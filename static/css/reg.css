@@ -1,0 +1,223 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    background: url("/static/images/login.jpg") no-repeat;
+    background-size: cover;
+    background-position: center;
+    animation: animateBg 5s linear infinite;
+    padding: 20px;
+}
+
+@keyframes animateBg {
+    100% {
+        transform: none
+    }
+}
+
+.login-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    min-height: 450px;
+    margin: auto;
+    padding: 30px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    background: transparent;
+    backdrop-filter: blur(50px);
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    font-size: 2em;
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    position: relative;
+    width: 100%;
+    margin: 25px 0;
+    border-bottom: 2px solid #fff;
+}
+
+.form-group label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: #fff;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.form-group .form-control {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #FFF;
+    padding: 0 35px 0 5px;
+    border-bottom: 2px solid #fff;
+}
+
+.form-group .form-control:focus ~ label,
+.form-group .form-control:valid ~ label {
+    top: -12px;
+    font-size: 0.9em;
+    color: #ddd;
+}
+
+.form-group .icon{
+    position: absolute;
+    right: 8px;
+    color: #fff;
+    font-size: 1.2em;
+    line-height: 57px;
+}
+
+button{
+    width: 100%;
+    height: 50px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #000;
+    font-weight: 500;
+    margin-top: 20px;
+}
+
+/* Hover Effect */
+button:hover {
+    background: #e3aaff;
+    box-shadow: -2px 0px 15px rgba(255, 255, 255, 0.4);
+}
+
+/* Active (Click) Effect */
+button:active {
+    box-shadow: -2px 0px 15px #ffffff;
+}
+
+.login{
+    font-size: .9em;
+    color: #fff;
+    text-align: center;
+    margin: 25px 0 10px;
+}
+
+.login p a{
+    color: #FFF;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login p a:hover{
+    text-decoration: underline;
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 25px 0;
+    border-bottom: 2px solid #fff;
+}
+
+.password-container input {
+    width: 100%;
+    height: 50px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #FFF;
+    padding: 0 35px 0 5px;
+}
+
+.password-container button {
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    color: white;
+}
+
+.password-container .icon {
+    position: absolute;
+    right: 8px;
+    color: #fff;
+    font-size: 1.2em;
+    line-height: 57px;
+}
+
+/* Mobile Styles */
+@media (max-width: 480px) {
+    section {
+        padding: 20px;
+    }
+
+    .login-container {
+        padding: 20px 15px;
+        min-height: auto;
+        margin: 10px;
+    }
+
+    .form-group {
+        margin: 20px 0;
+    }
+
+    .form-group .form-control {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-size: 1.8em;
+    }
+
+    button {
+        height: 45px;
+        font-size: 16px;
+    }
+
+    .login {
+        margin: 20px 0;
+    }
+}
+
+/* Autofill styles */
+.form-group .form-control:-webkit-autofill,
+.form-group .form-control:-webkit-autofill:hover,
+.form-group .form-control:-webkit-autofill:focus,
+.form-group .form-control:-webkit-autofill:active {
+    background-color: transparent !important;
+    color: #FFF !important;
+    -webkit-text-fill-color: #FFF !important;
+    transition: background-color 5000s ease-in-out 0s;
+}

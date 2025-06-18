@@ -1,0 +1,42 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Other existing links -->
+</head>
+<div class="dashboard-container">
+    <section id="overview" class="dashboard-section active">
+        <div class="stats-container">
+            <!-- Existing stats content -->
+        </div>
+        
+        <div class="notifications-container">
+            <!-- Notifications will be dynamically added here -->
+        </div>
+        
+        <div class="charts-container">
+            <!-- Existing charts content -->
+        </div>
+    </section>
+    <!-- Other sections -->
+</div>
+
+<!-- Certificate Modal -->
+<div id="certificateModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Upload Certificate</h2>
+        <div class="modal-body">
+            <p>Skill: <span id="certificateSkillName"></span></p>
+            <div class="form-group">
+                <label for="certificateFile">Select Certificate File:</label>
+                <input type="file" id="certificateFile" accept=".pdf,.png,.jpg,.jpeg" class="form-control">
+                <small class="form-text text-muted">Allowed formats: PDF, PNG, JPG, JPEG</small>
+            </div>
+            <button id="saveCertificate" class="btn btn-primary">Upload Certificate</button>
+        </div>
+    </div>
+</div> 

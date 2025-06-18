@@ -1,0 +1,51 @@
+<div class="col-md-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Goals Progress</h5>
+        </div>
+        <div class="card-body">
+            <div class="goals-summary mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6>Overall Progress</h6>
+                    <span class="badge bg-primary" id="total-goals-progress">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" id="total-goals-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="text-center mt-2">
+                    <small class="text-muted" id="total-goals-count">0/0 goals completed</small>
+                </div>
+            </div>
+            <div id="goals-by-type">
+                <!-- Goals by type will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="text" id="learningSource" ...>
+<div id="sourceSuggestions" class="suggestions-container"></div>
+
+<input type="text" id="startDate" class="flatpickr" ...>
+<input type="text" id="expectedEndDate" class="flatpickr" ...>
+
+<script>
+    flatpickr(".flatpickr", {
+        dateFormat: "Y-m-d",
+        enableTime: false,
+        allowInput: true
+    });
+
+    document.getElementById('startDate').addEventListener('blur', function() {
+        this.value = this.value.split(' ')[0];
+    });
+    document.getElementById('expectedEndDate').addEventListener('blur', function() {
+        this.value = this.value.split(' ')[0];
+    });
+
+    console.log(document.getElementById('startDate').value);
+    console.log(document.getElementById('expectedEndDate').value);
+
+    startDateInput.value = startDateInput.value.split(' ')[0];
+    expectedEndDateInput.value = expectedEndDateInput.value.split(' ')[0];
+</script> 

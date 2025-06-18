@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan Fusion Dashboard</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="{{ url_for('static', filename='css/dash.css') }}" as="style">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600&display=swap" as="style">
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" as="style">
+  
+  <!-- Load CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash.css') }}" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+  
+  <!-- Defer non-critical JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" defer></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</head>
+<body class="preload">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div id="flash-message-container">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+  <nav>
+    <div class="nav_header">
+      <div class="nav_logo">
+        <img src="{{ url_for('static', filename='images/logo (2).png') }}" alt="Logo">
+        <a href="#">Plan<span>Fusion</span>.</a>
+      </div>
+      <div class="nav_menu_btn" id="menu-btn">
+        <span><i class="ri-menu-line"></i></span>
+      </div>
+    </div>
+    <ul class="nav_links" id="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#about">About Us</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+    <div class="nav_btns">
+      <button class="btn sign_up" id="regBtn">Register</button>
+      <button class="btn sign_in" id="loginBtn">Sign In</button>
+    </div>
+  </nav>
+  <header id="home" class="header_container">
+    <div class="header_img">
+      <div class="header_img_card card-1">
+        <span><i class="ri-todo-line"></i></span>
+        To-Do List
+      </div>
+      <div class="header_img_card card-2">
+        <span><i class="ri-flag-line"></i></span>
+        Learning
+      </div>
+      <div class="header_img_card card-3">
+        <span><i class="ri-book-open-line"></i></span>
+        Skill Development
+      </div>
+      <div class="header_img_card card-4">
+        <span><i class="ri-calendar-event-line"></i></span>
+        Networking & </br> Social Growth
+      </div>
+      <img src="{{ url_for('static', filename='images/imagb.png') }}" alt="header">
+    </div>
+    <div class="header_content">
+      <h1>ACHIEVE MORE!<br />YOUR <span>GROWTH</span> <br>STARTS HERE</h1>
+      <p>
+        Take control of your goals and boost productivity – Manage tasks, develop new skills, and expand your network
+        with ease.
+      </p>
+      <form action="/">
+        <div class="input__row">
+          <div class="input__group">
+            <h5>Task</h5>
+            <div>
+              <span><i class="ri-task-line"></i></span>
+              <input type="text" id="taskInput" placeholder="Task" />
+            </div>
+          </div>
+          <div class="input__group">
+            <h5>Learning Goal</h5>
+            <div>
+              <span><i class="ri-book-open-line"></i></span>
+              <input type="text" id="skillInput" placeholder="Learn Python" />
+            </div>
+          </div>
+          <div class="input__group">
+            <h5>Meet & Connect</h5>
+            <div>
+              <span><i class="ri-calendar-event-line"></i></span>
+              <input type="text" id="followUpInput" placeholder="Follow up" />
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn submitBtn">Start Here</button>
+      </form>
+      
+
+    </div>
+  </header>
+  <section id="about" class="about">
+    <div class="about-container">
+        <div class="about-content">
+            <h2>About <span>Plan Fusion</span></h2>
+            <p>
+              My Life Manager is your all-in-one productivity tool designed to help you stay organized, 
+              track your progress, and manage your tasks effortlessly. Whether you're focusing on personal 
+              growth, networking, or skill development, we've got you covered.
+          </p>
+          <p>
+              Our mission is to empower individuals with <strong>smart task management, learning progress tracking,</strong> 
+              and <strong>social networking reminders</strong>—all in one sleek and user-friendly platform.
+          </p>
+          <button class="learn-more-btn" id="learnMoreBtn">Learn More</button>
+        </div>
+        <div class="about-image">
+            <img src="static/images/about.png" alt="Productivity illustration">
+        </div>
+    </div>
+</section>
+<section id="features" class="features">
+  <div class="features-container">
+      <h2>Key <span>Features</span></h2>
+      <div class="features-grid">
+          <div class="feature-box">
+              <i class="ri-todo-line"></i>
+              <h3>Task Management</h3>
+              <p>Organize your to-dos efficiently and stay on top of deadlines.</p>
+          </div>
+          <div class="feature-box">
+              <i class="ri-book-open-line"></i>
+              <h3>Skill Tracking</h3>
+              <p>Set learning goals and track your progress towards mastery.</p>
+          </div>
+          <div class="feature-box">
+              <i class="ri-calendar-event-line"></i>
+              <h3>Networking & Social Growth</h3>
+              <p>Plan meetings, follow-ups, and enhance professional connections.</p>
+          </div>
+          <div class="feature-box">
+              <i class="ri-bar-chart-line"></i>
+              <h3>Performance Insights</h3>
+              <p>Visualize your achievements with interactive analytics.</p>
+          </div>
+      </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="contact-container">
+      <h2>Contact <span>Us</span></h2>
+      <p>Have questions? Reach out to us!</p>
+      <form action="{{ url_for('contact') }}" method="POST">
+        <div class="form-group">
+            <input type="text" name="name" placeholder="Your Name" required />
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder="Your Email" required />
+        </div>
+        <div class="form-group">
+            <textarea name="message" placeholder="Your Message" required></textarea>
+        </div>
+        <div class="sbtnf">
+            <button type="submit" class="sbtn">Send Message</button>
+        </div>
+    </form>     
+  </div>
+  <div class="bar">
+    Copyright © 2024 Plan Fusion. All rights reserved.
+  </div>    
+</section>
+
+  <script src="https://unpkg.com/scrollreveal"></script>
+  <script src="{{ url_for('static', filename='js/dash.js') }}"></script>
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-content">
+      <h2>More About <span>Plan Fusion</span></h2>
+      <p>Plan Fusion is designed for professionals, students, and anyone looking to enhance productivity. With task management, skill tracking, and networking tools, you can streamline your workflow effortlessly.</p>
+      <p><strong>Why choose us?</strong></p>
+      <ul>
+        <li>🚀 Smart AI-powered task prioritization</li>
+        <li>📈 Visual analytics & productivity insights</li>
+        <li>🤝 Networking & follow-up reminders</li>
+        <li>🛠️ Personalized learning recommendations</li>
+      </ul>
+      <button class="close-btn" id="closeBtn">Close</button>
+    </div>
+  </div>
+  
+</body>
+
+</html>

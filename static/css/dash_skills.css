@@ -1,0 +1,1088 @@
+/* CSS for the Skills Section */
+.skills-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 2px;
+  margin-top: -20px;
+  padding: 9px 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  font-size: 28px;
+  font-weight: bold;
+  font-family: serif;
+}
+.header-left span {
+  font-size: 25px;
+}
+.header-left i {
+  margin-right: 10px;
+  font-size: 25px;
+}
+
+.header-right {
+  display: flex;
+  gap: 10px;
+}
+
+.skills-input-container {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-input {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  position: relative; /* For absolute positioning of suggestions */
+}
+
+.skills-input label {
+  font-weight: bold;
+  color: #555;
+}
+
+.skills-input input[type="text"],
+.skills-input input.flatpickr {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.skills-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-button,
+.cancel-button {
+  background-color: #8a2be2;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #dc3545;
+  display: none; /* Initially hidden */
+}
+
+.skills-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.skill-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.skill-list.list-view li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skill-list.list-view li .skill-actions {
+  gap: 10px; /* Adjust spacing for the new button */
+}
+
+.skill-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adjusted minmax for more space */
+  gap: 10px;
+}
+
+.skill-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  
+}
+
+.skill-details {
+  flex-grow: 1;
+}
+
+.skill-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.skill-progress {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  height: 10px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.4s cubic-bezier(.4,2,.6,1), background 0.3s;
+}
+
+.progress-bar.completed {
+  background-color: #43a047; /* Green for 100% */
+}
+
+.progress-bar.high {
+  background-color: #1976d2; /* Blue for 75-99% */
+}
+
+.progress-bar.medium {
+  background-color: #fbc02d; /* Yellow for 50-74% */
+}
+
+.progress-bar.low {
+  background-color: #fb8c00; /* Orange for 25-49% */
+}
+
+.progress-bar.very-low {
+  background-color: #43a047; /* Green for 0-24% (changed from red) */
+}
+
+.skill-meta {
+  font-size: 0.9em;
+  color: #555;
+}
+
+.skill-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.skill-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+  background: #f8f8f8;
+}
+
+.skill-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.skill-actions button i {
+  font-size: 16px;
+}
+
+.edit-button, .delete-button, .notes-button, .documents-button, .complete-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.edit-button:hover, .delete-button:hover, .notes-button:hover, .documents-button:hover, .complete-button:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Tooltip styles for all buttons */
+.edit-button::after, .delete-button::after, .notes-button::after, .documents-button::after, .complete-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background: #333;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.edit-button:hover::after, .delete-button:hover::after, .notes-button:hover::after, .documents-button:hover::after, .complete-button:hover::after {
+  opacity: 1;
+  visibility: visible;
+  bottom: calc(100% + 5px);
+}
+
+.edit-button::after {
+  content: "Edit";
+}
+
+.delete-button::after {
+  content: "Delete";
+}
+
+.notes-button::after {
+  content: "Notes";
+}
+
+.documents-button::after {
+  content: "Documents";
+}
+
+.complete-button::after {
+  content: "Complete";
+}
+
+.complete-button.completed::after {
+  content: "Undo";
+}
+
+.complete-button {
+  color: #28a745;
+  background: #e8f5e9;
+}
+
+.complete-button:hover {
+  background: #28a745;
+  color: white;
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+
+.complete-button.completed {
+  color: #666;
+  background: #f0f0f0;
+}
+
+.complete-button.completed:hover {
+  background: #666;
+  color: white;
+  box-shadow: 0 4px 8px rgba(102, 102, 102, 0.2);
+}
+
+.skill-actions .notes-count,
+.skill-actions .documents-count {
+  background: rgba(138, 43, 226, 0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #8a2be2;
+  transition: all 0.3s ease;
+}
+
+.notes-button:hover .notes-count,
+.documents-button:hover .documents-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Responsive styles for mobile */
+@media screen and (max-width: 768px) {
+  .skill-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .skill-actions button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .skill-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .skill-actions button i {
+    font-size: 14px;
+  }
+}
+
+/* Suggestions container style */
+.suggestions-container {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  display: none;
+}
+
+.suggestions-container.show {
+  display: block;
+}
+
+.suggestion-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.suggestion-item:hover {
+  background-color: #eee;
+}
+
+.additional-inputs {
+  display: none;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.show {
+  display: flex; /* Show modal when class 'show' is added */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 6px 6px 6px 6px;
+  border-radius: 6px;
+  width: 80%;
+  max-width: 500px;
+  position: relative;
+  max-height: 55vh;
+}
+
+.close-button {
+  color: #aaa;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#learningToday,
+#certificateURL,
+#newNote,
+#newDocumentURL {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#saveReport,
+#saveCertificate,
+#saveNoteButton,
+#addDocumentButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+#saveReport:hover,
+#saveCertificate:hover,
+#saveNoteButton:hover,
+#addDocumentButton:hover {
+  background-color: #0056b3;
+}
+
+/* Glance Report Modal Styles */
+#glanceReportContent,
+#notesList,
+#documentsList {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  white-space: pre-wrap; /* Preserve formatting of reports */
+}
+
+.report-entry {
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #eee;
+}
+
+.report-entry p {
+  margin: 5px 0;
+}
+
+.note-item {
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.note-item:last-child {
+  border-bottom: none;
+}
+
+.document-item {
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.document-item a {
+  color: #007bff;
+  text-decoration: none;
+  flex-grow: 1;
+}
+
+.document-item a:hover {
+  text-decoration: underline;
+}
+
+.delete-document-button {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.delete-document-button:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.delete-document-button i {
+  font-size: 1.2em;
+}
+
+/* ... other CSS ... */
+
+#documentsModal h3 {
+  color: #333;
+  margin-top: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+#certificateDisplay {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+#certificateDisplay p {
+  margin-bottom: 5px;
+  font-size: 0.95em;
+}
+
+#certificateDisplay p strong {
+  font-weight: bold;
+}
+
+#certificateDisplay a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+#certificateDisplay a:hover {
+  text-decoration: underline;
+}
+
+#completionCertificateURL {
+  width: calc(100% - 12px);
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.9em;
+}
+
+#saveCertificateURLButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+#saveCertificateURLButton:hover {
+  background-color: #1e7e34;
+}
+
+#notesList .note-date {
+  font-weight: bold;
+  color: #555;
+  margin-right: 5px;
+}
+
+.certificate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.certificate-link-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.certificate-inputs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.certificate-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.certificate-upload h4 {
+  margin: 0;
+  color: #555;
+}
+
+#uploadCertificate {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#uploadCertificateButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+#uploadCertificateButton:hover {
+  background-color: #1e7e34;
+}
+
+#deleteCertificateButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#deleteCertificateButton:hover {
+  background-color: #c82333;
+}
+
+#deleteCertificateButton i {
+  font-size: 1.2em;
+}
+
+.skill-item:hover {
+  border-color: #8a2be2;
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.25);
+}
+
+.skill-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.skill-actions i:hover {
+  color: inherit;
+}
+
+.skill-progress-bar::-webkit-progress-value {
+  background-color: #8a2be2;
+}
+
+/* Modal overlay and content */
+#notesModal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.18);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+#notesModal.show {
+    display: flex;
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 16px rgba(138,43,226,0.10), 0 1px 3px rgba(0,0,0,0.08);
+    padding: 12px 10px 10px 10px;
+    width: 98%;
+    max-width: 370px;
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid #ece6fa;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.modal-content:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 40px rgba(138,43,226,0.15), 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modal-content h2 {
+    font-size: 0.98em;
+    font-weight: 700;
+    color: #2d1e4a;
+    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.modal-content h2 i {
+    color: #8a2be2;
+    font-size: 1.2em;
+}
+
+.close-button {
+    color: #b9b9b9;
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #8a2be2;
+    background: #f3eaff;
+    transform: rotate(90deg);
+}
+
+#notesList {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.day-note-item {
+    background: #faf8ff;
+    border: 1px solid #e0d6f7;
+    border-radius: 2px;
+    padding: 2px 2px 1px 2px;
+    margin: 0 0 2px 0;
+    transition: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: unset;
+    height: unset;
+}
+
+.day-note-item strong {
+    font-size: 0.9em;
+    color: #2d1e4a;
+    margin-bottom: 0;
+    margin-top: -40px;
+    display: block;
+    line-height: 1.2;
+    margin-bottom: -60px;
+}
+
+.day-note-textarea {
+    width: 100%;
+    min-height: 28px;
+    max-height: 70px;
+    border: 1px solid #d1c4e9;
+    border-radius: 3px;
+    padding: 3px 6px;
+    font-size: 0.9em;
+    font-family: inherit;
+    color: #2d1e4a;
+    background: #faf8ff;
+    margin: 0 0 2px 0;
+    resize: vertical;
+    transition: none;
+    line-height: 2.3;
+}
+
+.note-actions, .edit-controls {
+    display: flex;
+    gap: 1px;
+    margin-top: -20px;
+    flex-wrap: nowrap;
+    margin-bottom: -50px;
+}
+
+.edit-note-btn, .complete-day-btn, .save-note-edit-btn, .cancel-note-edit-btn {
+    flex: 1;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    min-width: 0;
+    height: 35px;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.edit-note-btn {
+    background: #f3eaff;
+    color: #8a2be2;
+}
+
+.edit-note-btn:hover {
+    background: #e0d6f7;
+    color: #5d1e9c;
+}
+
+.edit-note-btn span, .complete-day-btn span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: inherit;
+    font-weight: 500;
+}
+
+.edit-note-btn i, .complete-day-btn i {
+    font-size: 1em;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+}
+
+.complete-day-btn:hover {
+    background: #6d1bb3;
+}
+.complete-day-btn:disabled {
+    background: #d1c4e9;
+    cursor: not-allowed;
+}
+
+.save-note-edit-btn {
+    background: #8a2be2;
+    color: white;
+}
+
+.save-note-edit-btn:hover {
+    background: #6d1bb3;
+}
+
+.cancel-note-edit-btn {
+    background: #f3eaff;
+    color: #8a2be2;
+}
+
+.cancel-note-edit-btn:hover {
+    background: #e0d6f7;
+    color: #5d1e9c;
+}
+
+/* Scrollbar styling */
+.modal-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #d1c4e9;
+    border-radius: 2px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #8a2be2;
+}
+
+.notes-list {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    white-space: pre-wrap;
+}
+
+.skill-priority {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-left: 6px;
+    text-transform: capitalize;
+    background: #ece6fa;
+    color: #5d1e9c;
+    border: 1px solid #e0d6f7;
+}
+
+.skill-priority.low {
+    background: #e6f7fa;
+    color: #1e88e5;
+    border-color: #b3e5fc;
+}
+.skill-priority.medium {
+    background: #fffbe6;
+    color: #f9a825;
+    border-color: #ffe082;
+}
+.skill-priority.high {
+    background: #ffe6e6;
+    color: #e53935;
+    border-color: #ffcdd2;
+}
+
+.skill-item.completed {
+    background: #e6f9e6 !important;
+    border: 1.5px solid #43a047 !important;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.skill-item.completed .skill-details {
+    background: transparent !important;
+}
+
+.catalog-link {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 4px 8px;
+    background-color: #8a2be2;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+
+.catalog-link:hover {
+    background-color: #6a1cb2;
+}
+
+/* Edit Modal Styles */
+#editModal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 1000;
+    padding-top: 50px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#editModal.show {
+    display: flex;
+    opacity: 1;
+}
+
+#editModal .modal-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 16px rgba(138,43,226,0.10), 0 1px 3px rgba(0,0,0,0.08);
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+#editModal.show .modal-content {
+    transform: translateY(0);
+}
+
+#editModal .skills-input {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+#editModal .skills-input label {
+    font-weight: 600;
+    color: #2d1e4a;
+    font-size: 0.95em;
+}
+
+#editModal .skills-input input,
+#editModal .skills-input select {
+    padding: 10px;
+    border: 1px solid #d1c4e9;
+    border-radius: 4px;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+#editModal .skills-input input:focus,
+#editModal .skills-input select:focus {
+    border-color: #8a2be2;
+    box-shadow: 0 0 0 2px rgba(138,43,226,0.1);
+    outline: none;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+#saveEdit {
+    background: #8a2be2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#saveEdit:hover {
+    background: #6d1bb3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(138,43,226,0.2);
+}
+
+#cancelEdit {
+    background: #f3eaff;
+    color: #8a2be2;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#cancelEdit:hover {
+    background: #e0d6f7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(138,43,226,0.1);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    #editModal {
+        padding-top: 20px;
+    }
+    
+    #editModal .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    #saveEdit, #cancelEdit {
+        width: 100%;
+    }
+}
+
+

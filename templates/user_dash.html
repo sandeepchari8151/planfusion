@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Dashboard - Plan Fusion</title>
+
+  <!-- Linking CSS and external libraries -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash1.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_profile.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_skills.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_tasks.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_network.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_home.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dash_settings.css') }}">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Popup message styles -->
+  <style>
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .popup-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .popup-message {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+
+    .popup-overlay.show .popup-message {
+      transform: translateY(0);
+    }
+
+    .popup-message h3 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+
+    .popup-message p {
+      margin: 0;
+      color: #666;
+    }
+
+    .popup-message .notification-count {
+      font-size: 24px;
+      font-weight: bold;
+      color: #8A2BE2;
+      margin: 10px 0;
+    }
+
+    .popup-message .close-btn {
+      background: #8A2BE2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s ease;
+    }
+
+    .popup-message .close-btn:hover {
+      background: #9932CC;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Popup message container -->
+  <div class="popup-overlay" id="notificationPopup">
+    <div class="popup-message">
+      <h3>New Notifications</h3>
+      <div class="notification-count" id="popupNotificationCount">0</div>
+      <p>You have new notifications waiting for you!</p>
+      <button class="close-btn" onclick="closePopup()">Close</button>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav>
+    <div class="nav_header">
+      <div class="nav_logo">
+        <a href="#">Plan<span>Fusion</span></a>
+      </div>
+      <div class="nav_menu_btn" id="menu-btn">
+        <i class="ri-menu-line"></i>
+      </div>
+    </div>
+
+    <ul class="nav_links" id="nav-links">
+      <li><a href="#" class="nav-item active" data-target="home"><i class='bx bxs-dashboard icon'></i> Dashboard</a>
+      </li>
+      <li><a href="#" class="nav-item" data-target="tasks"><i class='bx bx-list-check icon'></i> Tasks</a></li>
+      <li><a href="#" class="nav-item" data-target="skills"><i class='bx bx-briefcase icon'></i> Skills</a></li>
+      <li><a href="#" class="nav-item" data-target="networking"><i class='bx bx-group icon'></i> Networking</a></li>
+    </ul>
+
+    <div class="nav_btns">
+      <div class="search-box">
+        <button class="btn-search"><i class="ri-search-line"></i></button>
+        <input type="text" class="input-search" placeholder="Type to Search..." fdprocessedid="i95gi5" style="width: 40px;padding: 10px;">
+      </div>
+      <div class="notification-wrapper">
+        <a href="#" class="nav-link notification-link">
+          <i class="ri-notification-3-line"></i>
+          <span id="notificationCount" class="badge">0</span>
+          <div id="notificationDropdown" class="notification-dropdown">
+            <div class="notification-header">
+              <h4>Notifications</h4>
+              <button class="clear-notifications">Clear All</button>
+            </div>
+            <div class="notification-sections">
+              <div class="notification-section pending-section">
+                <h4>Pending Items</h4>
+                <div class="notification-list pending-list">
+                  <!-- Pending notifications will be added here -->
+                </div>
+              </div>
+              <div class="notification-section completed-section">
+                <h4>Completed Items</h4>
+                <div class="notification-list completed-list">
+                  <!-- Completed notifications will be added here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <span class="divider"></span>
+      <div class="profile-dropdown">
+        <div class="profile-toggle" id="profile-toggle">
+          <img
+            id="profile-toggle-avatar"
+            src="{{ profile.avatar_url if profile and profile.avatar_url else url_for('static', filename='images/profile.jpg') }}"
+            alt="User Avatar">
+        </div>
+        <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+          <ul>
+            <li><a href="#" class="nav-item" data-target="profile"><i class='bx bxs-user-circle icon'></i> Profile</a></li>
+            <li><a href="#" id="settingsModalBtn"><i class='bx bxs-cog icon'></i> Settings</a></li>
+            <li><a href="#" id="logout"><i class='bx bxs-log-out-circle icon'></i> Logout</a></li>
+          </ul>
+          <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="dashboard-container">
+
+    <section id="home" class="dashboard-section active">
+      <h2>Welcome to Plan Fusion, {{ profile.full_name if profile and profile.full_name else 'User' }}</h2>
+      <p>Manage your tasks, skills, and networking all in one place.</p>
+
+      <div id="notificationContainer" class="notifications-container">
+        <!-- Notifications will be dynamically added here -->
+      </div>
+
+      <div class="info-data">
+        <div class="card">
+          <div class="head">
+            <div>
+              <h2>{{ completed_tasks_count }}</h2>
+              <p>Completed Tasks</p>
+            </div>
+            <i class='bx bx-check-circle icon'></i>
+          </div>
+          <span class="progress" data-value="{{ task_completion_percentage }}%"><div class="progress-fill"></div></span>
+          <span class="label">{{ task_completion_percentage }}% completed</span>
+        </div>
+        <div class="card">
+          <div class="head">
+            <div>
+              <h2>{{ completed_skills_count }}</h2>
+              <p>Developed Skills</p>
+            </div>
+            <i class='bx bx-briefcase icon'></i>
+          </div>
+          <span class="progress" data-value="{{ skill_completion_percentage }}%"><div class="progress-fill"></div></span>
+          <span class="label">{{ skill_completion_percentage }}% developed</span>
+        </div>
+        <div class="card">
+          <div class="head">
+            <div>
+              <h2>{{ total_contacts_count }}</h2>
+              <p>Network Contacts</p>
+            </div>
+            <i class='bx bx-group icon'></i>
+          </div>
+          <span class="progress" data-value="{{ network_growth_percentage }}%"><div class="progress-fill"></div></span>
+          <span class="label">{{ network_growth_percentage }}% growth</span>
+        </div>
+        <div class="card">
+          <div class="head">
+            <div>
+              <h2>{{ goals_achieved_count }}/{{ total_goals_count }}</h2>
+              <p>Networking Goals</p>
+            </div>
+            <i class='bx bx-flag icon'></i>
+          </div>
+          <span class="progress" data-value="{{ goal_achievement_percentage }}%"><div class="progress-fill"></div></span>
+          <span class="label">{{ goal_achievement_percentage }}% achieved</span>
+        </div>
+      </div>
+
+      <div class="data">
+        <div class="content-data">
+          <div class="head">
+            <h3>Task Progress</h3>
+            <div class="menu">
+              <i class='bx bx-dots-horizontal-rounded icon'></i>
+              <ul class="menu-link">
+                <li><a href="#" data-target="tasks">View All</a></li>
+                <li><a href="#" data-target="tasks">Add New</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="chart">
+            <canvas id="taskProgressChart"></canvas>
+          </div>
+          <div class="task-stats">
+            <div class="stat-item">
+              <i class='bx bx-check-circle'></i>
+              <span class="stat-value">{{ completed_tasks_count }}</span>
+              <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-time'></i>
+              <span class="stat-value">{{ pending_tasks_count }}</span>
+              <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-calendar-exclamation'></i>
+              <span class="stat-value">{{ overdue_tasks_count }}</span>
+              <span class="stat-label">Overdue</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-data">
+          <div class="head">
+            <h3>Skill Development</h3>
+            <div class="menu">
+              <i class='bx bx-dots-horizontal-rounded icon'></i>
+              <ul class="menu-link">
+                <li><a href="#" data-target="skills">View All</a></li>
+                <li><a href="#" data-target="skills">Add New</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="chart">
+            <canvas id="skillProgressChart"></canvas>
+          </div>
+          <div class="skill-stats">
+            <div class="stat-item">
+              <i class='bx bx-badge-check'></i>
+              <span class="stat-value">{{ completed_skills_count }}</span>
+              <span class="stat-label">Mastered</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-trending-up'></i>
+              <span class="stat-value">{{ in_progress_skills_count }}</span>
+              <span class="stat-label">In Progress</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-target-lock'></i>
+              <span class="stat-value">{{ skill_completion_percentage }}%</span>
+              <span class="stat-label">Overall Progress</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-data">
+          <div class="head">
+            <h3>Network Growth</h3>
+            <div class="menu">
+              <i class='bx bx-dots-horizontal-rounded icon'></i>
+              <ul class="menu-link">
+                <li><a href="#" data-target="networking">View Network</a></li>
+                <li><a href="#" data-target="networking">Add Contact</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="chart">
+            <canvas id="networkGrowthChart"></canvas>
+          </div>
+          <div class="network-stats">
+            <div class="stat-item">
+              <i class='bx bx-user-plus'></i>
+              <span class="stat-value">{{ new_contacts_count }}</span>
+              <span class="stat-label">New This Month</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-calendar-check'></i>
+              <span class="stat-value">{{ upcoming_meetings_count }}</span>
+              <span class="stat-label">Upcoming Meetings</span>
+            </div>
+            <div class="stat-item">
+              <i class='bx bx-trending-up'></i>
+              <span class="stat-value">{{ network_growth_percentage }}%</span>
+              <span class="stat-label">Growth Rate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task Management Section -->
+    <section id="tasks" class="dashboard-section">
+      <header class="tasks-header">
+          <h2><i class="ri-calendar-todo-line"></i> Tasks</h2>
+          <p id="tcurrentDate">Thursday, March 27</p>
+          <div class="header-right">
+              <button id="viewToggle" class="view-toggle">
+                  <i class="ri-grid-fill"></i> Grid View
+              </button>
+              <button id="sortToggle" class="sort-toggle">
+                  <i class="ri-sort-asc"></i> Sort
+              </button>
+          </div>
+      </header>
+
+      <div class="todo-container">
+        <!-- Main Task Section -->
+        <div class="todo-main">
+          <!-- Task Input Field -->
+          <div class="task-container">
+            <div class="add-task">
+              <span class="plus-icon">+</span>
+              <input type="text" id="taskInput" placeholder="Add a task...">
+              <button id="addTaskBtn" class="add-task-btn">Add Task</button>
+            </div>
+
+            <div class="task-options">
+              <!-- Priority -->
+              <div class="dropdown">
+                <button class="dropdown-toggle" data-dropdown="priorityDropdown" data-tooltip="Set task priority level">
+                  <span id="priorityDisplay">Priority</span> <i class="ri-flag-line"></i>
+                </button>
+                <div class="dropdown-menu" id="priorityDropdown">
+                  <p><strong>Priority</strong></p>
+                  <ul>
+                    <li class="priority-high" data-tooltip="High priority tasks are urgent and important"><i class="ri-flag-fill"></i> High</li>
+                    <li class="priority-medium" data-tooltip="Medium priority tasks are important but not urgent"><i class="ri-flag-fill"></i> Medium</li>
+                    <li class="priority-low" data-tooltip="Low priority tasks are not urgent and can be done later"><i class="ri-flag-fill"></i> Low</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Due Date -->
+              <div class="dropdown">
+                <button class="dropdown-toggle" data-dropdown="dueDropdown" data-tooltip="Set when the task is due">
+                  <span id="dueDisplay">Due</span> <i class="ri-calendar-line"></i>
+                </button>
+                <div class="dropdown-menu" id="dueDropdown">
+                  <p><strong>Due</strong></p>
+                  <ul>
+                    <li data-tooltip="Task is due today"><i class="ri-calendar-event-line"></i> Today</li>
+                    <li data-tooltip="Task is due tomorrow"><i class="ri-calendar-event-line"></i> Tomorrow</li>
+                    <li data-tooltip="Task is due next week"><i class="ri-calendar-event-line"></i> Next Week</li>
+                    <li data-tooltip="Select a custom due date"><i class="ri-calendar-2-line"></i> Pick a date</li>
+                  </ul>
+                </div>
+                <input type="text" class="due-date-input" style="display: none;">
+              </div>
+
+              <!-- Reminder -->
+              <div class="dropdown">
+                <button class="dropdown-toggle" data-dropdown="reminderDropdown" data-tooltip="Set a reminder for the task">
+                  <span id="reminderDisplay">Reminder</span> <i class="ri-notification-line"></i>
+                </button>
+                <div class="dropdown-menu" id="reminderDropdown">
+                  <p><strong>Reminder</strong></p>
+                  <ul>
+                    <li data-tooltip="Get reminded later today"><i class="ri-time-line"></i> Later today</li>
+                    <li data-tooltip="Get reminded tomorrow"><i class="ri-time-line"></i> Tomorrow</li>
+                    <li data-tooltip="Get reminded next week"><i class="ri-time-line"></i> Next week</li>
+                    <li data-tooltip="Set a custom reminder date and time"><i class="ri-calendar-check-line"></i> Pick a date</li>
+                  </ul>
+                </div>
+                <input type="text" class="reminder-input" style="display: none;">
+              </div>
+            </div>
+          </div>
+          <!-- Task List Display -->
+          <ul id="taskList" class="task-list"></ul>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="skills" class="dashboard-section">
+      <header class="skills-header">
+          <h2><i class="ri-briefcase-line"></i> Skills</h2>
+          <p id="scurrentDate">Sunday, April 20</p>
+          <div class="header-right">
+              <button id="sviewToggle" class="view-toggle">
+                  <i class="ri-grid-fill"></i> Grid View
+              </button>
+              <button id="ssortToggle" class="sort-toggle">
+                  <i class="ri-sort-asc"></i> Sort
+              </button>
+          </div>
+      </header>
+  
+      <div class="skills-input-container">
+          <div class="skills-input initial-input">
+              <label for="newSkill">Skill Name:</label>
+              <input type="text" id="newSkill" placeholder="e.g., Python Programming" required>
+              <div id="skillSuggestions" class="suggestions-container"></div>
+          </div>
+          <div class="skills-input additional-inputs">
+              <div class="input-group">
+                  <label for="startDate">Starting Date:</label>
+                  <input type="text" id="startDate" class="flatpickr" placeholder="Select start date" required>
+              </div>
+              
+              <div class="input-group">
+                  <label for="expectedEndDate">Expected Completion Date:</label>
+                  <input type="text" id="expectedEndDate" class="flatpickr" placeholder="Select end date" required>
+              </div>
+
+              <div class="input-group">
+                  <label for="learningSource">Learning From:</label>
+                  <input type="text" id="learningSource" placeholder="e.g., Infosys Spring, Coursera, Udemy" list="learningSourcesList" required>
+                  <datalist id="learningSourcesList">
+                    <option value="Infosys Spring">
+                    <option value="Coursera">
+                    <option value="Udemy">
+                    <option value="edX">
+                    <option value="Pluralsight">
+                    <option value="LinkedIn Learning">
+                    <option value="Codecademy">
+                    <option value="FreeCodeCamp">
+                    <option value="YouTube">
+                  </datalist>
+                  <div id="sourceSuggestions" class="suggestions-container"></div>
+              </div>
+
+              <div class="input-group">
+                  <label for="skillLevel">Current Level:</label>
+                  <select id="skillLevel" required>
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                  </select>
+              </div>
+
+              <div class="input-group">
+                  <label for="skillPriority">Priority:</label>
+                  <select id="skillPriority" name="skillPriority">
+                      <option value="low">Low</option>
+                      <option value="medium" selected>Medium</option>
+                      <option value="high">High</option>
+                  </select>
+              </div>
+          </div>
+          <div class="skills-actions">
+              <button class="add-button" id="addSkill">Add Skill</button>
+              <button class="cancel-button" id="cancelAdd">Cancel</button>
+          </div>
+      </div>
+  
+      <div class="skills-content">
+          <ul id="skillList" class="skill-list list-view">
+              </ul>
+      </div>
+  
+      <div id="certificateModal" class="modal" style="display: none;">
+          <div class="modal-content">
+              <span class="close-button">&times;</span>
+              <h3>Congratulations!</h3>
+              <p>You have completed <span id="certificateSkillName"></span>.</p>
+              <label for="certificateURL">Certificate URL (Optional):</label>
+              <input type="url" id="certificateURL" placeholder="Enter certificate link">
+              <button id="saveCertificate">Save Certificate</button>
+          </div>
+      </div>
+  
+      <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Notes for <span id="notesSkillName"></span></h2>
+            <div id="notesList">
+            </div>
+        </div>
+    </div>
+  
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Edit Skill</h2>
+            <div class="skills-input">
+                <label for="editSkillName">Skill Name:</label>
+                <input type="text" id="editSkillName" placeholder="Enter skill name">
+                
+                <label for="editLearningSource">Learning Source:</label>
+                <input type="text" id="editLearningSource" placeholder="Where are you learning from?">
+                
+                <label for="editStartDate">Start Date:</label>
+                <input type="text" id="editStartDate" class="flatpickr" placeholder="Select start date">
+                
+                <label for="editEndDate">Expected End Date:</label>
+                <input type="text" id="editEndDate" class="flatpickr" placeholder="Select end date">
+                
+                <label for="editSkillLevel">Skill Level:</label>
+                <select id="editSkillLevel">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                </select>
+                
+                <label for="editSkillPriority">Priority:</label>
+                <select id="editSkillPriority">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="saveEdit" class="save-button">Save Changes</button>
+                <button id="cancelEdit" class="cancel-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+  
+    <div id="documentsModal" class="modal">
+      <div class="modal-content">
+          <span class="close-button">&times;</span>
+          <h2>Documents for <span id="documentsSkillName"></span></h2>
+  
+          <h3>Completion Certificate</h3>
+          <div id="certificateDisplay">
+              <div class="certificate-actions">
+                  <div class="certificate-link-container">
+                      Certificate: <a id="certificateLink" href="#" target="_blank"></a>
+                  </div>
+                  <div class="certificate-upload">
+                      <h4>Upload Certificate</h4>
+                      <input type="file" id="certificateFile" accept=".pdf,.png,.jpg,.jpeg">
+                      <button id="uploadCertificateButton">Upload Certificate</button>
+                  </div>
+                  <button id="deleteCertificateButton" class="delete-button" style="display: none;">
+                      <i class="ri-delete-bin-line"></i> Delete Certificate
+                  </button>
+              </div>
+          </div>
+  
+          <h3>Other Documents</h3>
+          <div id="documentsList">
+          </div>
+  
+          <div>
+              <h4>Upload New Document</h4>
+              <input type="file" id="uploadNewDocument" accept=".pdf,.doc,.docx">
+              <button id="uploadDocumentButton">Upload Document</button>
+          </div>
+      </div>
+  </div>
+  </section>
+
+
+<!--network section -->
+<section id="networking" class="dashboard-section">
+  <header class="network-header">
+      <h2><i class='bx bx-group'></i> Networking</h2>
+      <p id="ncurrentDate">Thursday, March 27</p>
+      <div class="header-right">
+          <button id="nviewToggle" class="view-toggle">
+              <i class='bx bx-grid-alt'></i> Grid View
+          </button>
+          <button id="nsortToggle" class="sort-toggle">
+              <i class='bx bx-sort'></i> Sort
+          </button>
+      </div>
+  </header>
+  <div class="search-bar">
+      <input type="text" id="contactSearch" placeholder="Search contacts and goals...">
+  </div>
+
+  <div class="network-input-container">
+      <button id="addContactBtn"><i class="ri-user-add-line"></i> Add Contact</button>
+      <button id="addGoalBtn"><i class="ri-target-line"></i> Add Goal</button>
+  </div>
+
+  <div id="addContactForm" class="network-form" style="display: none;">
+      <h3>New Contact</h3>
+      <form id="contactForm">
+          <div class="form-group">
+              <label for="contactName">Name:</label>
+              <input type="text" id="contactName" name="contactName" placeholder="Name" required>
+              <div class="error-message" id="contactNameError"></div>
+          </div>
+          <div class="form-group">
+              <label for="contactEmail">Email:</label>
+              <input type="email" id="contactEmail" name="contactEmail" placeholder="Email">
+              <div class="error-message" id="contactEmailError"></div>
+          </div>
+          <div class="form-group">
+              <label for="contactPhone">Phone:</label>
+              <input type="tel" id="contactPhone" name="contactPhone" placeholder="Phone">
+              <div class="error-message" id="contactPhoneError"></div>
+          </div>
+          <div class="form-group">
+              <label for="contactCategory">Category:</label>
+              <select id="contactCategory" name="contactCategory" required>
+                  <option value="friends">Friends</option>
+                  <option value="colleagues">Colleagues</option>
+                  <option value="mentors">Mentors</option>
+                  <option value="potential">Potential</option>
+                  <option value="alumni">Alumni</option>
+                  <option value="other">Other</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="lastInteraction">Last Interaction:</label>
+              <input type="text" id="lastInteraction" name="lastInteraction" class="flatpickr-input" placeholder="Last Interaction">
+          </div>
+          <div class="form-group">
+              <label for="followUpReminder">Follow Up:</label>
+              <input type="text" id="followUpReminder" name="followUpReminder" class="flatpickr-input" placeholder="Follow Up">
+          </div>
+          <div class="form-group">
+              <label for="interactionNotes">Notes:</label>
+              <textarea id="interactionNotes" name="interactionNotes" placeholder="Notes"></textarea>
+          </div>
+          <button type="submit">Save Contact</button>
+          <button type="button" id="cancelContact">Cancel</button>
+      </form>
+  </div>
+
+  <div id="addGoalForm" class="network-form" style="display: none;">
+      <h3>Set Goal</h3>
+      <form id="goalForm">
+          <div class="form-group">
+              <label for="goalDescription">Goal:</label>
+              <input type="text" id="goalDescription" name="goalDescription" placeholder="Goal" required>
+              <div class="error-message" id="goalDescriptionError"></div>
+          </div>
+          <div class="form-group">
+              <label for="goalType">Type:</label>
+              <select id="goalType" name="goalType">
+                  <option value="" disabled selected>Type</option>
+                  <option value="events">Events</option>
+                  <option value="connections">Connections</option>
+                  <option value="followups">Follow-ups</option>
+                  <option value="meetings">Meetings</option>
+                  <option value="linkedin_messages">LinkedIn</option>
+                  <option value="other">Other</option>
+              </select>
+          </div>
+          <div class="form-group">
+              <label for="goalTarget">Target:</label>
+              <input type="number" id="goalTarget" name="goalTarget" placeholder="Target" value="0">
+              <div class="error-message" id="goalTargetError"></div>
+          </div>
+          <div class="form-group">
+              <label for="goalDeadline">Deadline:</label>
+              <input type="text" id="goalDeadline" name="goalDeadline" class="flatpickr-input" placeholder="Deadline">
+          </div>
+          <div class="form-group">
+              <label for="goalCompleted">Completed:</label>
+              <input type="number" id="goalCompleted" name="goalCompleted" value="0" placeholder="Completed">
+          </div>
+          <button type="submit">Save Goal</button>
+          <button type="button" id="cancelGoal">Cancel</button>
+      </form>
+  </div>
+
+  <h3>Your Contacts</h3>
+  <div class="contact-grid">
+  </div>
+
+  <ul class="contact-list" style="display: none;">
+      </ul>
+
+  <h3>Networking Goals</h3>
+  <div class="goal-grid">
+  </div>
+</section>
+
+
+    <!-- Profile Section -->
+    <section id="profile" class="dashboard-section">
+      <div class="card-wrapper">
+        <!-- Edit Profile Button -->
+        <button id="editProfileBtn" class="edit-profile-btn"><i class='bx bxs-edit'></i> Edit Profile</button>
+        
+        <!-- Block 1: Profile Summary -->
+        <div class="card profile-summary-card block-1" style="height: 489px;">
+          <div class="card-header">
+            <div class="card-cover cover-image"></div>
+            <!-- Avatar Display -->
+            <div class="avatar-wrapper">
+              <div class="avatar-edit-wrapper">
+                <img id="profileAvatar" class="card-avatar" src="{{ profile.avatar_url if profile and profile.avatar_url else url_for('static', filename='images/profile.jpg') }}" alt="avatar" />
+              </div>
+            </div>
+            <h3 class="card-fullname">{{ profile.full_name if profile and profile.full_name else 'Your Name' }}</h3>
+            <p class="card-jobtitle">{{ profile.job_title if profile and profile.job_title else 'Your Job Title' }}</p>
+          </div>
+
+          <div class="card-main">
+            <div class="card-content">
+              <div class="card-subtitle">BIO</div>
+              <p class="card-desc">
+                {{ profile.bio if profile and profile.bio else '' }}
+              </p>
+            </div>
+
+            <div class="card-social social-display">
+              <a href="{{ profile.linkedin_url if profile and profile.linkedin_url else '#' }}" target="_blank">
+                <i class="ri-linkedin-fill"></i>
+              </a>
+              <a href="{{ profile.twitter_url if profile and profile.twitter_url else '#' }}" target="_blank">
+                <i class="ri-twitter-fill"></i>
+              </a>
+              <a href="{{ profile.instagram_url if profile and profile.instagram_url else '#' }}" target="_blank">
+                <i class="ri-instagram-fill"></i>
+              </a>
+              <a href="{{ profile.facebook_url if profile and profile.facebook_url else '#' }}" target="_blank">
+                <i class="ri-facebook-fill"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 2: Tabbed Content -->
+        <div class="card tabbed-details-card block-2">
+          <div class="card-main">
+            <!-- Tab Sections -->
+            <div class="card-section" id="about">
+              <div class="card-content">
+                <div class="card-subtitle">ABOUT</div>
+                <p class="card-desc">
+                  {{ profile.bio if profile and profile.bio else '' }}
+                </p>
+              </div>
+            </div>
+
+            <div class="card-section" id="experience">
+              <div class="card-content">
+                <div class="card-subtitle">PERFORMANCE</div>
+                <div class="card-timeline">
+                  <div class="card-item">
+                    <div class="card-item-title">Total Completed Tasks</div>
+                    <div class="card-item-desc">
+                      {{ profile.completed_tasks if profile and profile.completed_tasks is not none else 0 }}
+                    </div>
+                  </div>
+                  <div class="card-item">
+                    <div class="card-item-title">Total Developed Skills</div>
+                    <div class="card-item-desc">
+                      {{ profile.completed_skills if profile and profile.completed_skills is not none else 0 }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-section is-active" id="contact">
+              <div class="card-content">
+                <div class="card-subtitle">CONTACT</div>
+                <div class="card-contact contact-address">
+                    <i class="ri-map-pin-line"></i>
+                    <div class="contact-text">
+                        {{ profile.address if profile and profile.address else '' }}
+                    </div>
+                </div>
+                <div class="card-contact contact-phone">
+                    <i class="ri-phone-fill"></i>
+                    <div class="contact-text">
+                        {{ profile.phone if profile and profile.phone else '' }}
+                    </div>
+                </div>
+                <div class="card-contact contact-email">
+                    <i class="ri-mail-line"></i>
+                    <div class="contact-text">
+                        {{ profile.email if profile and profile.email else '' }}
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="card-buttons">
+              <button data-section="#about">ABOUT</button>
+              <button data-section="#contact" class="is-active">CONTACT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Profile Modal -->
+      <div id="editProfileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <button class="close-button" aria-label="Close">&times;</button>
+          <h2>Edit Profile</h2>
+          <form id="editProfileForm">
+            <div class="form-group">
+              <label for="editFullName">Full Name:</label>
+              <input type="text" id="editFullName" name="full_name" value="{{ profile.full_name if profile and profile.full_name else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editJobTitle">Job Title:</label>
+              <input type="text" id="editJobTitle" name="job_title" value="{{ profile.job_title if profile and profile.job_title else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editBio">Bio:</label>
+              <textarea id="editBio" name="bio">{{ profile.bio if profile and profile.bio else '' }}</textarea>
+            </div>
+            <div class="form-group">
+              <label for="editAddress">Address:</label>
+              <input type="text" id="editAddress" name="address" value="{{ profile.address if profile and profile.address else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editPhone">Phone:</label>
+              <input type="text" id="editPhone" name="phone" value="{{ profile.phone if profile and profile.phone else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editEmail">Email:</label>
+              <input type="email" id="editEmail" name="email" value="{{ profile.email if profile and profile.email else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editLinkedIn">LinkedIn URL:</label>
+              <input type="url" id="editLinkedIn" name="linkedin_url" value="{{ profile.linkedin_url if profile and profile.linkedin_url else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editTwitter">Twitter URL:</label>
+              <input type="url" id="editTwitter" name="twitter_url" value="{{ profile.twitter_url if profile and profile.twitter_url else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editInstagram">Instagram URL:</label>
+              <input type="url" id="editInstagram" name="instagram_url" value="{{ profile.instagram_url if profile and profile.instagram_url else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editFacebook">Facebook URL:</label>
+              <input type="url" id="editFacebook" name="facebook_url" value="{{ profile.facebook_url if profile and profile.facebook_url else '' }}">
+            </div>
+            <div class="form-group">
+              <label for="editAvatar">Profile Picture:</label>
+              <div class="avatar-upload-section">
+                <img id="editAvatarPreview" class="avatar-preview" src="{{ profile.avatar_url if profile and profile.avatar_url else url_for('static', filename='images/profile.jpg') }}" alt="avatar preview">
+                <input type="file" id="editAvatar" name="avatar" accept="image/*">
+                <p class="avatar-upload-hint">Click to upload a new profile picture</p>
+              </div>
+            </div>
+            <div class="modal-buttons">
+              <button type="submit">Save Changes</button>
+              <button type="button" class="cancel-button">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content settings-modal-content">
+        <div class="modal-header">
+          <h2><i class="ri-settings-3-line"></i> Settings</h2>
+          <span class="close-button">&times;</span>
+        </div>
+        <div class="settings-container">
+          <ul class="settings-list">
+            <!-- Display Settings -->
+            <li class="settings-item">
+              <div class="settings-item-header">
+                <i class="ri-palette-line"></i>
+                <h3>Display Settings</h3>
+              </div>
+              <div class="settings-group">
+                <h4>Theme</h4>
+                <div class="setting-option">
+                  <span>Dark Mode</span>
+                  <label class="switch">
+                    <input type="checkbox" id="darkModeToggle">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Font Size</span>
+                  <select id="fontSizeSelect" class="settings-select">
+                    <option value="small">Small</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+              </div>
+            </li>
+
+            <!-- Language Settings -->
+            <li class="settings-item">
+              <div class="settings-item-header">
+                <i class="ri-translate-2"></i>
+                <h3>Language Settings</h3>
+              </div>
+              <div class="settings-group">
+                <h4>Interface Language</h4>
+                <div class="setting-option">
+                  <span>Language</span>
+                  <select id="languageSelect" class="settings-select">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="hi">हिंदी</option>
+                  </select>
+                </div>
+                <div class="setting-option">
+                  <span>Date Format</span>
+                  <select id="dateFormatSelect" class="settings-select">
+                    <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                    <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                    <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  </select>
+                </div>
+                <div class="setting-option">
+                  <span>Time Format</span>
+                  <select id="timeFormatSelect" class="settings-select">
+                    <option value="12h">12-hour (AM/PM)</option>
+                    <option value="24h">24-hour</option>
+                  </select>
+                </div>
+              </div>
+            </li>
+
+            <!-- Accessibility Settings -->
+            <li class="settings-item">
+              <div class="settings-item-header">
+                <i class="ri-accessibility-line"></i>
+                <h3>Accessibility Settings</h3>
+              </div>
+              <div class="settings-group">
+                <h4>Visual Assistance</h4>
+                <div class="setting-option">
+                  <span>High Contrast Mode</span>
+                  <label class="switch">
+                    <input type="checkbox" id="highContrastToggle">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Reduce Motion</span>
+                  <label class="switch">
+                    <input type="checkbox" id="reduceMotionToggle">
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Show Focus Indicators</span>
+                  <label class="switch">
+                    <input type="checkbox" id="focusIndicatorsToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </li>
+
+            <!-- Notification Settings -->
+            <li class="settings-item">
+              <div class="settings-item-header">
+                <i class="ri-notification-3-line"></i>
+                <h3>Notification Settings</h3>
+              </div>
+              <div class="settings-group">
+                <h4>General Notifications</h4>
+                <div class="setting-option">
+                  <span>Push Notifications</span>
+                  <label class="switch">
+                    <input type="checkbox" id="pushNotificationToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Email Notifications</span>
+                  <label class="switch">
+                    <input type="checkbox" id="emailNotificationToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-group">
+                <h4>Email Notification Preferences</h4>
+                <div class="setting-option">
+                  <span>Daily Task Reminders</span>
+                  <label class="switch">
+                    <input type="checkbox" id="dailyTaskReminderToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Task Due Date Reminders</span>
+                  <label class="switch">
+                    <input type="checkbox" id="dueDateReminderToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <span>Task Completion Notifications</span>
+                  <label class="switch">
+                    <input type="checkbox" id="completionNotificationToggle" checked>
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="setting-option">
+                  <button id="testNotificationBtn" class="test-notification-btn">
+                    <i class="ri-mail-send-line"></i> Send Test Notification
+                  </button>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Linking JavaScript -->
+  <script src="{{ url_for('static', filename='js/nav.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dash_home.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dash_tasks.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dash_skills.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dash_network.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dash_Profile.js') }}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+  <script src="{{ url_for('static', filename='js/dash_settings.js') }}"></script>
+
+  <!-- Add this script at the end of the body -->
+  <script>
+    // Function to get notification count
+    function getNotificationCount() {
+      const pendingList = document.querySelector('.pending-list');
+      if (pendingList) {
+        return pendingList.children.length;
+      }
+      return 0;
+    }
+
+    // Function to show popup
+    function showPopup() {
+      const count = getNotificationCount();
+      const popup = document.getElementById('notificationPopup');
+      const popupCount = document.getElementById('popupNotificationCount');
+      
+      if (count > 0 && popup && popupCount) {
+        popupCount.textContent = count;
+        // Force a reflow to ensure the animation works
+        void popup.offsetWidth;
+        popup.classList.add('show');
+      }
+    }
+
+    // Function to close popup
+    function closePopup() {
+      const popup = document.getElementById('notificationPopup');
+      if (popup) {
+        popup.classList.remove('show');
+      }
+    }
+
+    // Function to fetch notifications
+    async function fetchNotifications() {
+      try {
+        // Check if this is a dashboard refresh
+        const isDashboardRefresh = sessionStorage.getItem('isDashboardRefresh') === 'true';
+        // Clear the flag after checking
+        sessionStorage.removeItem('isDashboardRefresh');
+
+        // Use the dashboard_data endpoint
+        const response = await fetch('/dashboard_data');
+        const data = await response.json();
+
+        // Clear existing notifications
+        const pendingList = document.querySelector('.pending-list');
+        const completedList = document.querySelector('.completed-list');
+        if (pendingList) pendingList.innerHTML = '';
+        if (completedList) completedList.innerHTML = '';
+
+        let hasNotifications = false;
+
+        // Add task notifications
+        if (data.task_data && data.task_data.pending_tasks_list) {
+            data.task_data.pending_tasks_list.forEach(task => {
+                let message = '';
+                let dueText = task.due_date ? ` (Due: ${task.due_date})` : '';
+                if (task.priority && task.priority.toLowerCase() === 'high') {
+                    message = `⚠️ <b>${task.name}</b>${dueText} — <span style="color:#d32f2f">You have forgotten this high priority task!</span>`;
+                } else {
+                    message = `<b>${task.name}</b>${dueText} — Don't forget to complete this task!`;
+                }
+                addNotification(message, 'pending');
+                hasNotifications = true;
+            });
+        }
+
+        // Add skill notifications
+        if (data.skill_data && data.skill_data.in_progress_skills_list) {
+            data.skill_data.in_progress_skills_list.forEach(skill => {
+                addNotification(`Skill in progress: ${skill.name}`, 'pending');
+                hasNotifications = true;
+            });
+        }
+
+        // Add goal notifications
+        if (data.network_data && data.network_data.goals && data.network_data.goals.by_type) {
+            Object.entries(data.network_data.goals.by_type).forEach(([type, typeData]) => {
+                if (typeData.goals && typeData.goals.length > 0) {
+                    const incompleteGoals = typeData.goals.filter(goal => goal.completed === 0);
+                    if (incompleteGoals.length > 0) {
+                        addNotification(`${incompleteGoals.length} incomplete ${type} goals`, 'pending');
+                        hasNotifications = true;
+                    }
+                }
+            });
+        }
+
+        // Add meeting notifications
+        if (data.network_data && data.network_data.upcoming_meetings && data.network_data.upcoming_meetings.length > 0) {
+            addNotification(`${data.network_data.upcoming_meetings.length} upcoming meetings`, 'pending');
+            hasNotifications = true;
+        }
+
+        // Show popup if there are notifications and it's not a dashboard refresh
+        if (hasNotifications && !isDashboardRefresh) {
+            const popup = document.getElementById('notificationPopup');
+            const popupCount = document.getElementById('popupNotificationCount');
+            
+            if (popup && popupCount) {
+                const count = getNotificationCount();
+                popupCount.textContent = count;
+                // Force a reflow to ensure the animation works
+                void popup.offsetWidth;
+                popup.classList.add('show');
+            }
+        }
+
+        return true;
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return false;
+      }
+    }
+
+    // Function to add notification
+    function addNotification(message, type = 'pending') {
+      const notificationList = type === 'pending' 
+        ? document.querySelector('.pending-list')
+        : document.querySelector('.completed-list');
+      
+      if (notificationList) {
+        const notificationItem = document.createElement('div');
+        notificationItem.className = 'notification-item';
+        notificationItem.innerHTML = `
+          <div class="notification-content">
+            <p>${message}</p>
+          </div>
+        `;
+        
+        notificationList.appendChild(notificationItem);
+      }
+    }
+
+    // Initialize notifications when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fetch notifications immediately
+      fetchNotifications();
+      
+      // Set up periodic refresh (every 5 minutes)
+      setInterval(fetchNotifications, 5 * 60 * 1000);
+    });
+  </script>
+</body>
+
+</html>

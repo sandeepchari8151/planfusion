@@ -1,0 +1,24 @@
+<nav class="navbar">
+    <div class="logo">
+        <a href="{{ url_for('dashboard') }}">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="PlanFusion Logo">
+        </a>
+    </div>
+    <button id="menu-btn" class="nav_menu_btn">
+        <i class="fas fa-bars menu-icon"></i>
+    </button>
+    <ul class="nav_links">
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle">
+                Account
+                <i class="fas fa-chevron-down"></i>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ url_for('profile') }}">Profile</a></li>
+                <li><a href="{{ url_for('settings') }}">Settings</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav> 

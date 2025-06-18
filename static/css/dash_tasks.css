@@ -1,0 +1,1716 @@
+.dashboard-section {
+  display: none;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.dashboard-section.active {
+  display: block;
+}
+
+.task-categories,
+.view-options,
+.task-options,
+.add-task-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.category-btn,
+.view-btn {
+  padding: 8px 15px;
+  border: none;
+  background: var(--primary-color);
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.category-btn.active,
+.view-btn.active {
+  background: var(--primary-color-dark);
+}
+
+#sortTasks,
+#groupTasks,
+#showSuggestions {
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.task-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-container.grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.task-container.list-view {
+  display: block;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 8px;
+  height: 48px;
+}
+
+.task-content {
+  flex: 1;
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 24px;
+}
+
+.task-name {
+  font-size: 16px;
+  color: #333;
+  height: 24px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.edit-input {
+  width: 100%;
+  height: 24px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  outline: none;
+  margin: 0;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 10px;
+  align-items: center;
+  height: 24px;
+}
+
+.save-btn, .cancel-btn {
+  height: 24px;
+  line-height: 24px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+
+.save-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-btn:hover {
+  background: #218838;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.task-actions button {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.task-actions .edit-task-btn:hover {
+  background-color: #e9ecef;
+  color: #8a2be2;
+}
+
+.task-actions .delete-task-btn:hover {
+  background-color: #fee2e2;
+  color: #dc3545;
+}
+
+.task-actions .complete-task-btn {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.task-actions .complete-task-btn:hover {
+  background: #218838;
+}
+
+.task-actions .complete-task-btn.completed {
+  background: #6c757d;
+}
+
+.task-actions .complete-task-btn.completed:hover {
+  background: #5a6268;
+}
+
+.task-item.completed .task-name {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.todo-menu li {
+  padding: 10px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.todo-menu li.active {
+  background: #e0e0e0;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.new-list-btn {
+  margin-top: auto;
+  padding: 10px;
+  border: none;
+  background: #6200ee;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* --- Todo Main Content Styles --- */
+.todo-main {
+  flex: 1;
+}
+
+.todo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.todo-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: serif;
+}
+
+.todo-controls button {
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.add-task-container {
+  margin-top: 20px;
+}
+
+.add-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.add-task-btn {
+  padding: 8px 16px;
+  background: #8a2be2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.add-task-btn:hover {
+  background: #9932cc;
+}
+
+.plus-icon {
+  font-size: 24px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.plus-icon:hover {
+  color: #8a2be2;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.task-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.task-input input {
+  width: 70%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.task-input button {
+  background-color: #5c67f2;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.task-checkbox {
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.task-checkbox.completed {
+  color: green;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.task-actions button {
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.task-actions .edit-task-btn:hover {
+  background-color: #e9ecef;
+  color: #8a2be2;
+}
+
+.task-actions .delete-task-btn:hover {
+  background-color: #fee2e2;
+  color: #dc3545;
+}
+
+.task-actions .complete-task-btn {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.task-actions .complete-task-btn:hover {
+  background: #218838;
+}
+
+.task-actions .complete-task-btn.completed {
+  background: #6c757d;
+}
+
+.task-actions .complete-task-btn.completed:hover {
+  background: #5a6268;
+}
+
+.grid-view .task-item {
+  display: inline-block;
+  width: 45%;
+  margin: 5px;
+}
+
+.list-view .task-item {
+  width: 100%;
+}
+
+.task-input-container {
+  display: flex;
+  align-items: center;
+  background: #f8f8f8;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.task-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #999;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.task-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+}
+
+.task-icons {
+  display: flex;
+  gap: 12px;
+  margin-right: 10px;
+}
+
+.task-icons i {
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+}
+
+.task-add-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.task-add-btn:hover {
+  background: #eee;
+}
+
+/* --- Newly Added Task Styles --- */
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 8px;
+}
+
+.task-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #6a5acd;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.task-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #6c757d;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.task-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.task-meta i {
+  font-size: 14px;
+}
+
+.task-priority {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.task-priority.high {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.task-priority.medium {
+  background-color: #fff8e1;
+  color: #ff8f00;
+}
+
+.task-priority.low {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.task-due {
+  color: #0d6efd;
+}
+
+.task-reminder {
+  color: #198754;
+}
+
+.task-label {
+  color: #6f42c1;
+}
+
+.task-star {
+  color: #ccc;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.task-star.active {
+  color: #6a5acd;
+}
+
+/* Task Container */
+.task-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* Input Field */
+#taskInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+}
+
+#taskInput:focus {
+  background: #fff;
+}
+
+/* Task Options */
+.task-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 100;
+}
+
+/* Dropdowns */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown-toggle:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-toggle.selected {
+  background: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  min-width: 160px;
+  padding: 8px 0;
+  margin: 2px 0 0;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu.show {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-menu p {
+  padding: 8px 12px;
+  margin: 0;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-menu li:hover {
+  background: #f5f5f5;
+}
+
+.dropdown-menu li i {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Priority specific styles */
+.dropdown-menu li.priority-high {
+  color: #f5222d;
+}
+
+.dropdown-menu li.priority-high:hover {
+  background: #fff1f0;
+}
+
+.dropdown-menu li.priority-medium {
+  color: #faad14;
+}
+
+.dropdown-menu li.priority-medium:hover {
+  background: #fffbe6;
+}
+
+.dropdown-menu li.priority-low {
+  color: #52c41a;
+}
+
+.dropdown-menu li.priority-low:hover {
+  background: #f6ffed;
+}
+
+/* Ensure dropdowns are not hidden by other elements */
+.task-options {
+  position: relative;
+  z-index: 100;
+}
+
+/* Debug styles - remove these after testing */
+.dropdown-menu {
+  border: 1px solid red; /* Temporary border to see the dropdown area */
+}
+
+.dropdown-menu.show {
+  border: 1px solid green; /* Temporary border to see when dropdown is shown */
+}
+
+/* Reminder specific styles */
+#reminderDropdown li {
+  background-color: #f8f9fa;
+}
+
+#reminderDropdown li:hover {
+  background-color: #e9ecef;
+}
+
+/* Due date specific styles */
+#dueDropdown li {
+  background-color: #f8f9fa;
+}
+
+#dueDropdown li:hover {
+  background-color: #e9ecef;
+}
+
+/* Label specific styles */
+#labelDropdown li {
+  background-color: #f8f9fa;
+}
+
+#labelDropdown li:hover {
+  background-color: #e9ecef;
+}
+
+/* Ensure the text is clearly visible */
+.dropdown-menu li span {
+  color: #333;
+  font-weight: 500;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Task List */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-item {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  transition: all 0.3s;
+}
+
+.task-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.task-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.task-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #6c757d;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.task-checkbox:hover {
+  border-color: #8a2be2;
+}
+
+.task-item.completed .task-checkbox {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+.task-name {
+  font-size: 16px;
+  color: #212529;
+}
+
+.task-name.completed {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.task-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.editable-field {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.editable-field:hover {
+  background: #f8f9fa;
+}
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.task-actions i {
+  font-size: 18px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.task-actions i:hover {
+  color: #8a2be2;
+}
+
+.complete-btn {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.complete-btn:hover {
+  background: #218838;
+}
+
+.complete-btn.completed {
+  background: #6c757d;
+}
+
+.complete-btn.completed:hover {
+  background: #5a6268;
+}
+
+/* Priority Colors */
+.priority-high {
+  border-left: 4px solid #dc3545;
+}
+
+.priority-medium {
+  border-left: 4px solid #ffc107;
+}
+
+.priority-low {
+  border-left: 4px solid #28a745;
+}
+
+/* Important Task */
+.important-task {
+  background: #fff3e0;
+}
+
+/* Completed Task */
+.task-item.completed {
+  background: #f8f9fa;
+}
+
+.task-item.completed .task-name {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+/* Edit Input */
+.edit-input {
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+}
+
+.edit-input:focus {
+  border-color: #8a2be2;
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.25);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .task-options {
+      flex-direction: column;
+  }
+  
+  .dropdown-toggle {
+      width: 100%;
+  }
+  
+  .task-meta {
+      flex-wrap: wrap;
+  }
+}
+
+/* Tooltip Styles */
+[data-tooltip] {
+  position: relative;
+  cursor: pointer;
+}
+
+[data-tooltip]:before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 15px;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+  height: auto;
+  white-space: normal;
+  width: max-content;
+  min-height: fit-content;
+  max-width: 300px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+  z-index: 1500;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
+  text-align: left;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+[data-tooltip]:hover:before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-10px);
+}
+
+/* Adjust tooltip position for dropdown menu items */
+.dropdown-menu li[data-tooltip]:before {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 15px;
+  width: max-content;
+  min-width: 180px;
+  max-width: 250px;
+  height: auto;
+  min-height: fit-content;
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  padding: 12px 15px;
+}
+
+.dropdown-menu li[data-tooltip]:hover:before {
+  transform: translateY(-50%);
+  left: calc(100% + 10px);
+}
+
+/* Ensure proper text wrapping for long descriptions */
+.dropdown-menu li[data-tooltip] {
+  position: relative;
+  overflow: visible;
+  height: auto;
+  min-height: fit-content;
+}
+
+/* Ensure dropdowns don't get cut off */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  position: relative;
+  z-index: 1;
+}
+
+/* Flash Messages Styles */
+.flash-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  z-index: 2000;
+  text-align: center;
+  min-width: 300px;
+  max-width: 600px;
+  animation: slideDown 0.5s ease-out forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.flash-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.flash-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.flash-message.warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.flash-message.info {
+  background-color: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+/* Flash Message Animation */
+@keyframes slideDown {
+  0% {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+/* Auto-hide animation */
+.flash-message.hide {
+  animation: slideUp 0.5s ease-in forwards;
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+}
+
+/* Close button for flash messages */
+.flash-message .close-flash {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 5px;
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.flash-message .close-flash:hover {
+  opacity: 1;
+}
+
+/* Profile section specific flash message positioning */
+#profile .flash-message {
+  position: fixed;
+  top: 80px; /* Adjust this value based on your header height */
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0 auto;
+  z-index: 2000;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header .header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.section-header .add-btn {
+    background: #8a2be2;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header .add-btn:hover {
+    background: #9932cc;
+}
+
+.section-header .view-options {
+    display: flex;
+    gap: 10px;
+}
+
+.section-header .view-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+}
+
+.section-header .view-btn:hover {
+    background: #f8f9fa;
+}
+
+.section-header .view-btn.active {
+    background: #8a2be2;
+    color: white;
+    border-color: #8a2be2;
+}
+
+/* Skills Section Specific Styles */
+.skills-section .section-header {
+    background: linear-gradient(to right, #f8f9fa, white);
+}
+
+.skills-section .section-header h2 i {
+    color: #6f42c1;
+}
+
+.skills-section .add-btn {
+    background: #6f42c1;
+}
+
+.skills-section .add-btn:hover {
+    background: #5a32a3;
+}
+
+.skills-section .view-btn.active {
+    background: #6f42c1;
+    border-color: #6f42c1;
+}
+
+/* Tasks Section Specific Styles */
+.tasks-section .section-header {
+    background: linear-gradient(to right, #f8f9fa, white);
+}
+
+.tasks-section .section-header h2 i {
+    color: #8a2be2;
+}
+
+.tasks-section .add-btn {
+    background: #8a2be2;
+}
+
+.tasks-section .add-btn:hover {
+    background: #9932cc;
+}
+
+.tasks-section .view-btn.active {
+    background: #8a2be2;
+    border-color: #8a2be2;
+}
+
+/* Network Section Specific Styles */
+.network-section .section-header {
+    background: linear-gradient(to right, #f8f9fa, white);
+}
+
+.network-section .section-header h2 i {
+    color: #28a745;
+}
+
+.network-section .add-btn {
+    background: #28a745;
+}
+
+.network-section .add-btn:hover {
+    background: #218838;
+}
+
+.network-section .view-btn.active {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.tasks-header, .skills-header, .network-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 2rem 0;
+    padding: 1.25rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: 60px;
+    box-sizing: border-box;
+}
+
+.tasks-header h2, .skills-header h2, .network-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.tasks-header i, .skills-header i, .network-header i {
+    margin-right: 0.5rem;
+    color: #8a2be2;
+    font-size: 1.5rem;
+    padding: 0;
+}
+
+.tasks-header p, .skills-header p{
+    font-size: 1em;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+}
+
+.header-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.view-toggle, .sort-toggle {
+    background-color: #8a2be2;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 36px;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.view-toggle i, .sort-toggle i {
+    font-size: 1.2em;
+}
+
+.view-toggle:hover, .sort-toggle:hover {
+    background-color: #9932cc;
+}
+
+/* Priority and completed task row coloring */
+.task-item.priority-high:not(.completed) {
+  background: #ffebee !important;
+  border-left: 4px solid #f44336 !important;
+}
+.task-item.priority-medium:not(.completed) {
+  background: #fff8e1 !important;
+  border-left: 4px solid #ffc107 !important;
+}
+.task-item.priority-low:not(.completed) {
+  background: #f5f5f5 !important;
+  border-left: 4px solid #9e9e9e !important;
+}
+.task-item.completed {
+  background: #e8f5e9 !important;
+  border-left: 4px solid #4caf50 !important;
+}
+
+/* Task Edit Modal Styles */
+.task-edit-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    overflow-y: auto; /* Enable scrolling for the modal background */
+}
+
+.task-edit-modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Change from center to flex-start */
+    padding: 20px; /* Add padding around the modal content */
+}
+
+.task-edit-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; /* Add margin for better spacing */
+    max-height: calc(100vh - 40px); /* Limit height to viewport minus padding */
+    overflow-y: auto; /* Enable scrolling for the modal content */
+}
+
+.task-edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: sticky; /* Make header sticky */
+    top: 0;
+    background: white;
+    padding: 10px 0;
+    z-index: 1;
+}
+
+.task-edit-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.task-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-bottom: 20px; /* Add padding at the bottom */
+}
+
+.task-edit-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.task-edit-form label {
+    font-weight: 500;
+    color: #555;
+}
+
+.task-edit-form input,
+.task-edit-form select,
+.task-edit-form textarea {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.task-edit-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.task-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    position: sticky; /* Make actions sticky */
+    bottom: 0;
+    background: white;
+    padding: 10px 0;
+    z-index: 1;
+}
+
+.task-edit-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.save-edit-btn {
+    background: #28a745;
+    color: white;
+}
+
+.save-edit-btn:hover {
+    background: #218838;
+}
+
+.cancel-edit-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.cancel-edit-btn:hover {
+    background: #5a6268;
+}
+
+/* Hide hidden Flatpickr trigger inputs */
+.flatpickr-input[style*="display: none"],
+#taskDueDate,
+#taskReminder {
+    display: none !important;
+}
+
+.grid-view.task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 0;
+}
+.grid-view .task-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
+  height: auto;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.sort-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.sort-toggle-btn:hover {
+    color: var(--primary-color);
+}
+
+.sort-toggle-btn i {
+    font-size: 16px;
+}
+
+.sort-options {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    z-index: 1000;
+    min-width: 200px;
+    margin-top: 4px;
+}
+
+.sort-options button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 14px;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.sort-options button:hover {
+    background-color: var(--hover-color);
+}
+
+.sort-options button i {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+/* Dark mode styles */
+.dark-mode .sort-toggle-btn {
+    color: var(--text-color);
+}
+
+.dark-mode .sort-toggle-btn:hover {
+    color: var(--primary-color);
+}
+
+.dark-mode .sort-options {
+    background: var(--bg-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .sort-options button {
+    color: var(--text-color);
+}
+
+.dark-mode .sort-options button:hover {
+    background-color: var(--hover-color);
+}
+
+/* High contrast mode styles */
+.high-contrast .sort-toggle-btn {
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+.high-contrast .sort-toggle-btn:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.high-contrast .sort-options {
+    border: 2px solid var(--text-color);
+}
+
+.high-contrast .sort-options button {
+    color: var(--text-color);
+}
+
+.high-contrast .sort-options button:hover {
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .sort-toggle-btn,
+    .sort-options button {
+        transition: none;
+    }
+}
+
+/* Date Picker Styles */
+.flatpickr-calendar {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 5px;
+    z-index: 9999 !important;
+}
+
+.flatpickr-calendar.open {
+    display: inline-block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.flatpickr-day.selected {
+    background: #8A2BE2 !important;
+    border-color: #8A2BE2 !important;
+}
+
+.flatpickr-day:hover {
+    background: #f0e6ff !important;
+}
+
+.flatpickr-time {
+    border-top: 1px solid #eee;
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:focus {
+    background: #f0e6ff !important;
+}
+
+/* Ensure the date picker is above other elements */
+.task-options {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Make sure the input is visible when needed */
+.due-date-input,
+.reminder-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.due-date-input.active,
+.reminder-input.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.dropdown-toggle[data-tooltip],
+.dropdown-menu li[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+.dropdown-toggle[data-tooltip]:before,
+.dropdown-menu li[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: 5px;
+}
+
+.dropdown-toggle[data-tooltip]:hover:before,
+.dropdown-menu li[data-tooltip]:hover:before {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Add a small arrow to the tooltip */
+.dropdown-toggle[data-tooltip]:after,
+.dropdown-menu li[data-tooltip]:after {
+    content: '';
+    position: absolute;
+    bottom: calc(100% - 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.dropdown-toggle[data-tooltip]:hover:after,
+.dropdown-menu li[data-tooltip]:hover:after {
+    visibility: visible;
+    opacity: 1;
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/todo.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+            <h2>PlanFusion</h2>
+        </div>
+        <ul>
+            <li><a href="{{ url_for('dash') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li class="active"><a href="#"><i class="fas fa-tasks"></i> To-Do List</a></li>
+            <li><a href="{{ url_for('learning') }}"><i class="fas fa-book"></i> Learning & Skills</a></li>
+            <li><a href="{{ url_for('networking') }}"><i class="fas fa-users"></i> Networking & Social Growth</a></li>
+            <li class="logout"><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Section -->
+    <div class="main-content">
+        <header>
+            <h2>To-Do List</h2>
+        </header>
+
+        <div class="todo-container">
+            <div class="add-task">
+                <input type="text" id="newTask" placeholder="Enter new task">
+                <button onclick="addTask()"><i class="fas fa-plus"></i> Add Task</button>
+            </div>
+
+            <ul id="todoList"></ul>
+        </div>
+    </div>
+
+
+    <script src="{{ url_for('static', filename='js/todo.js') }}"></script>
+</body>
+</html>
