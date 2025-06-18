@@ -402,7 +402,7 @@ def get_notification_count(email):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
-    Handles user login.
+    Handles user login with optimized database operations.
     """
     form = LoginForm()
     if form.validate_on_submit():
@@ -410,49 +410,74 @@ def login():
         password = form.password.data.strip()
         remember = request.form.get('remember')
 
-        # Check if account is locked
-        is_locked, lock_message = is_account_locked(email)
-        if is_locked:
-            flash(lock_message, "danger")
-            return render_template('login.html', form=form)
+        try:
+            # Check if account is locked - using a single query
+            attempt = login_attempts_collection.find_one({'email': email})
+            if attempt and attempt.get('attempts', 0) >= 3:
+                lock_time = attempt.get('lock_time')
+                if lock_time and datetime.utcnow() < lock_time:
+                    remaining_time = lock_time - datetime.utcnow()
+                    minutes = int(remaining_time.total_seconds() / 60)
+                    flash(f"Account is locked. Please try again in {minutes} minutes.", "danger")
+                    return render_template('login.html', form=form)
+                else:
+                    # Reset attempts if lock time has expired
+                    login_attempts_collection.update_one(
+                        {'email': email},
+                        {'$set': {'attempts': 0, 'lock_time': None}}
+                    )
 
-        user = find_one("users", {"email": email})
-        if not user:
-            logging.warning(f"Login attempt with non-existent email: {email}")
-            flash("Invalid email address.", "danger")
-            return render_template('login.html', form=form)
-            
-        if not bcrypt.checkpw(password.encode(), user['password'].encode()):
-            logging.warning(f"Failed login attempt for {email} - wrong password")
-            record_failed_attempt(email)
-            
-            # Check if account is now locked after this attempt
-            is_locked, lock_message = is_account_locked(email)
-            if is_locked:
-                flash(lock_message, "danger")
-            else:
-                remaining_attempts = 3 - login_attempts_collection.find_one({'email': email}).get('attempts', 0)
+            # Get user data with a single query
+            user = find_one("users", {"email": email})
+            if not user:
+                logging.warning(f"Login attempt with non-existent email: {email}")
+                flash("Invalid email address.", "danger")
+                return render_template('login.html', form=form)
+                
+            if not bcrypt.checkpw(password.encode(), user['password'].encode()):
+                logging.warning(f"Failed login attempt for {email} - wrong password")
+                # Update failed attempts in a single operation
+                login_attempts_collection.update_one(
+                    {'email': email},
+                    {
+                        '$inc': {'attempts': 1},
+                        '$set': {
+                            'lock_time': datetime.utcnow() + timedelta(hours=1) if attempt and attempt.get('attempts', 0) + 1 >= 3 else None
+                        }
+                    },
+                    upsert=True
+                )
+                
+                remaining_attempts = 3 - (attempt.get('attempts', 0) + 1 if attempt else 1)
                 flash(f"Incorrect password. {remaining_attempts} attempts remaining.", "danger")
+                return render_template('login.html', form=form)
+                
+            # Successful login
+            session['user_email'] = user['email']
+            session.permanent = bool(remember)
+            logging.info(f"Login successful for {user['email']}")
+            
+            # Reset login attempts
+            login_attempts_collection.update_one(
+                {'email': email},
+                {'$set': {'attempts': 0, 'lock_time': None}}
+            )
+            
+            # Get notification count in a single query
+            notification_count = get_notification_count(user['email'])
+            
+            if notification_count > 0:
+                flash(f"Login successful! You have {notification_count} new notifications.", "success")
+            else:
+                flash("Login successful!", "success")
+                
+            return redirect(url_for('user_dash'))
+            
+        except Exception as e:
+            logging.error(f"Login error: {str(e)}")
+            flash("An error occurred during login. Please try again.", "danger")
             return render_template('login.html', form=form)
             
-        # If we get here, both email and password are correct
-        session['user_email'] = user['email']
-        session.permanent = bool(remember)
-        logging.info(f"Login successful for {user['email']}")
-        
-        # Reset login attempts after successful login
-        reset_login_attempts(email)
-        
-        # Get notification count
-        notification_count = get_notification_count(user['email'])
-        
-        # Show success message with notification count
-        if notification_count > 0:
-            flash(f"Login successful! You have {notification_count} new notifications.", "success")
-        else:
-            flash("Login successful!", "success")
-            
-        return redirect(url_for('user_dash'))
     elif form.errors:
         for field, errors in form.errors.items():
             for error in errors:
