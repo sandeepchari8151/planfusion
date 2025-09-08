@@ -949,31 +949,56 @@ def contact():
 def get_user_profile(email):
     """
     Retrieves a user's profile from the user_profile collection.
+    Creates a default profile if none exists.
     """
-    return find_one("user_profile", {"email": email})
-
+    profile = find_one("user_profile", {"email": email})
+    if not profile:
+        # Create default profile
+        default_profile = {
+            "email": email,
+            "full_name": "",
+            "job_title": "",
+            "address": "",
+            "phone": "",
+            "bio": "",
+            "linkedin_url": "",
+            "twitter_url": "",
+            "instagram_url": "",
+            "facebook_url": "",
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        insert_one("user_profile", default_profile)
+        return default_profile
+    return profile
 
 def create_user_profile(data):
     """
     Creates a new user profile in the user_profile collection.
     """
+    data['created_at'] = datetime.utcnow()
+    data['updated_at'] = datetime.utcnow()
     return insert_one("user_profile", data)
-
 
 def update_user_profile(data, email):
     """
     Updates an existing user profile in the user_profile collection.
+    Creates a new profile if none exists.
     """
+    profile = find_one("user_profile", {"email": email})
+    if not profile:
+        return create_user_profile(data)
+
     update_data = {
-        "full_name": data.get("full_name"),
-        "job_title": data.get("job_title"),
-        "address": data.get("address"),
-        "phone": data.get("phone"),
-        "bio": data.get("bio"),
-        "linkedin_url": data.get("linkedin_url"),
-        "twitter_url": data.get("twitter_url"),
-        "instagram_url": data.get("instagram_url"),
-        "facebook_url": data.get("facebook_url"),
+        "full_name": data.get("full_name", profile.get("full_name", "")),
+        "job_title": data.get("job_title", profile.get("job_title", "")),
+        "address": data.get("address", profile.get("address", "")),
+        "phone": data.get("phone", profile.get("phone", "")),
+        "bio": data.get("bio", profile.get("bio", "")),
+        "linkedin_url": data.get("linkedin_url", profile.get("linkedin_url", "")),
+        "twitter_url": data.get("twitter_url", profile.get("twitter_url", "")),
+        "instagram_url": data.get("instagram_url", profile.get("instagram_url", "")),
+        "facebook_url": data.get("facebook_url", profile.get("facebook_url", "")),
         "updated_at": datetime.utcnow()
     }
     if data.get("avatar_url") is not None:
@@ -981,70 +1006,40 @@ def update_user_profile(data, email):
     return update_one("user_profile", {"email": email}, update_data)
 
 
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route('/profile', methods=['GET'])
 @login_required
 def profile():
-    """
-    Handles user profile creation and updates.
-    """
-    email = session['user_email']
-    profile = get_user_profile(email)
-    app.logger.info(f"Profile data fetched in /profile: {profile}")
+    try:
+        user_profile = get_user_profile(session['email'])
+        return render_template('profile.html', profile=user_profile)
+    except Exception as e:
+        flash('Error loading profile. Please try again.', 'error')
+        logger.error(f"Error in profile route: {str(e)}")
+        return redirect(url_for('dashboard'))
 
-    if request.method == 'POST':
+@app.route('/profile/update', methods=['POST'])
+@login_required
+def update_profile():
+    try:
         data = request.form.to_dict()
-        data['email'] = email
-        app.logger.info(f"Profile data received in /profile: {data}")
-
-        try:
-            # Handle avatar upload if present
-            if 'avatar' in request.files:
-                file = request.files['avatar']
-                if file and file.filename != '' and allowed_file(file.filename):
-                    # Ensure upload directory exists
-                    upload_dir = app.config['UPLOAD_FOLDER']
-                    if not os.path.exists(upload_dir):
-                        os.makedirs(upload_dir)
-                    
-                    # Generate unique filename
-                    filename = secure_filename(file.filename)
-                    unique_filename = f"{email}_{int(datetime.now().timestamp())}_{filename}"
-                    filepath = os.path.join(upload_dir, unique_filename)
-                    
-                    # Save file
-                    file.save(filepath)
-                    app.logger.info(f"Avatar file successfully saved to: {filepath}")
-                    
-                    # Generate URL
-                    avatar_url = url_for('static', filename=f'uploads/{unique_filename}', _external=True)
-                    data['avatar_url'] = avatar_url
-                    app.logger.info(f"Generated avatar_url: {avatar_url}")
-
-            if profile:
-                if update_user_profile(data, email):
-                    # Return the avatar URL if it was updated
-                    response_data = {"success": True, "message": "Profile updated successfully!"}
-                    if 'avatar_url' in data:
-                        response_data["avatar_url"] = data['avatar_url']
-                    return jsonify(response_data), 200
-                else:
-                    return jsonify({"success": False, "error": "Error updating profile data."}), 500
-            else:
-                if create_user_profile(data):
-                    # Return the avatar URL if it was created
-                    response_data = {"success": True, "message": "Profile created successfully!"}
-                    if 'avatar_url' in data:
-                        response_data["avatar_url"] = data['avatar_url']
-                    return jsonify(response_data), 200
-                else:
-                    return jsonify({"success": False, "error": "Error creating profile data."}), 500
-
-        except Exception as e:
-            app.logger.error(f"Profile update/creation error in /profile: {e}")
-            return jsonify({"success": False, "error": "An error occurred while updating/creating the profile."}), 500
-
-    return render_template('profile.html', profile=profile)
-
+        data['email'] = session['email']
+        
+        # Handle avatar upload
+        if 'avatar' in request.files:
+            avatar = request.files['avatar']
+            if avatar and allowed_file(avatar.filename):
+                filename = secure_filename(avatar.filename)
+                avatar_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                avatar.save(avatar_path)
+                data['avatar_url'] = url_for('static', filename=f'uploads/{filename}')
+        
+        update_user_profile(data, session['email'])
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('profile'))
+    except Exception as e:
+        flash('Error updating profile. Please try again.', 'error')
+        logger.error(f"Error in update_profile route: {str(e)}")
+        return redirect(url_for('profile'))
 
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
@@ -2058,7 +2053,8 @@ def reset_login_attempts(email):
 @login_required
 def get_user_settings():
     try:
-        user = find_one('users', {'email': session['email']})
+        email = session['user_email']  # Changed from session['email']
+        user = find_one('users', {'email': email})
         if not user:
             return jsonify({'error': 'User not found'}), 404
 
@@ -2080,12 +2076,14 @@ def get_user_settings():
         }
         return jsonify(settings)
     except Exception as e:
+        app.logger.error(f"Error in get_user_settings: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/user/settings', methods=['POST'])
 @login_required
 def update_user_settings():
     try:
+        email = session['user_email']  # Changed from session['email']
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
@@ -2121,12 +2119,16 @@ def update_user_settings():
                 update_data['focus_indicators'] = accessibility['focus_indicators']
 
         if update_data:
-            update_one('users', {'email': session['email']}, {'$set': update_data})
-            return jsonify({'message': 'Settings updated successfully'})
+            result = update_one('users', {'email': email}, {'$set': update_data})
+            if result:
+                return jsonify({'message': 'Settings updated successfully'})
+            else:
+                return jsonify({'error': 'Failed to update settings'}), 500
         else:
             return jsonify({'error': 'No valid settings to update'}), 400
 
     except Exception as e:
+        app.logger.error(f"Error in update_user_settings: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 # ✅ Run App
