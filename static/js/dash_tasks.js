@@ -149,6 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 selectedDueDate = selectedText;
             } else if (dropdown.id === 'reminderDropdown') {
                 selectedReminder = selectedText;
+            } else if (dropdown.id === 'priorityDropdown') {
+                selectedPriority = selectedText.toLowerCase();
             }
             dropdown.classList.remove('show');
         });
@@ -383,7 +385,22 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to add task');
+                if (response.status === 409) {
+                    const err = await response.json().catch(() => ({}));
+                    const msg = err.message || 'Task already exists with the same date, reminder, and priority';
+                    console.warn('Duplicate task detected (409):', msg);
+                    alert(msg);
+                    return null; // handled gracefully
+                }
+                let msg = 'Failed to add task';
+                try {
+                    const err = await response.json();
+                    if (err && err.message) msg = err.message;
+                } catch (e) {
+                    // ignore JSON parse errors
+                }
+                showNotification(msg, 'error');
+                return null;
             }
 
             const newTask = await response.json();
@@ -704,6 +721,56 @@ document.addEventListener("DOMContentLoaded", function () {
     function showNotification(message, type = 'info') {
         // Implement your notification system here
         console.log(`${type}: ${message}`);
+    }
+
+    function showPopup(message) {
+        if (document.querySelector('.popup-overlay')) return;
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        const popup = document.createElement('div');
+        popup.className = 'popup-message';
+        popup.innerHTML = `
+            <div class="popup-content">
+                <div class="popup-header">
+                    <span>Notice</span>
+                    <button class="popup-x" aria-label="Close">&times;</button>
+                </div>
+                <div class="popup-body">${message}</div>
+                <div class="popup-actions">
+                    <button class="popup-close">OK</button>
+                </div>
+            </div>
+        `;
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('show'));
+        function close() {
+            overlay.classList.remove('show');
+            setTimeout(() => overlay.remove(), 200);
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') close(); }
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+        popup.querySelector('.popup-close').addEventListener('click', close);
+        popup.querySelector('.popup-x').addEventListener('click', close);
+        if (!document.getElementById('popup-styles')) {
+            const style = document.createElement('style');
+            style.id = 'popup-styles';
+            style.textContent = `
+                .popup-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;z-index:9999}
+                .popup-overlay.show{opacity:1}
+                .popup-message{background:#fff;min-width:300px;max-width:90vw;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.15);overflow:hidden}
+                .popup-content{padding:16px}
+                .popup-header{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:8px}
+                .popup-x{background:transparent;border:none;font-size:20px;cursor:pointer}
+                .popup-body{margin:8px 0;color:#333}
+                .popup-actions{display:flex;justify-content:flex-end;margin-top:12px}
+                .popup-close{background:#8a2be2;border:none;color:#fff;padding:8px 14px;border-radius:6px;cursor:pointer}
+                .popup-close:hover{background:#7521c3}
+            `;
+            document.head.appendChild(style);
+        }
+        document.addEventListener('keydown', onKey);
     }
 
     // Function to update current date

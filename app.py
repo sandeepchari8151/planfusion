@@ -28,15 +28,117 @@ if os.path.exists('.env'):
 
 # ✅ Initialize Flask App
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Configure CORS to allow only specific origins (override via env)
+allowed_origins = os.getenv('CORS_ORIGINS', '*')
+CORS(app, resources={r"/*": {"origins": allowed_origins}})
 
-# Add CORS headers to all responses
+# Add CORS headers to all responses (respect configured origins)
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    if allowed_origins != '*':
+        response.headers['Access-Control-Allow-Origin'] = allowed_origins
+    else:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    # Strengthen no-cache for authenticated routes and auth pages to avoid stale user content
+    try:
+        endpoint = (request.endpoint or '').lower()
+        is_authenticated = 'user_email' in session
+        # Never cache dynamic authenticated pages
+        if is_authenticated:
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        # Also prevent caching login/register pages to keep flashes and forms fresh
+        if endpoint in ('login', 'register', 'verify_otp'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+    except Exception:
+        pass
     return response
+
+@app.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
+    """Verify emailed OTP and complete login (uses login.html inline OTP)."""
+    pending_email = session.get('pending_email')
+    if not pending_email:
+        flash('Session expired. Please log in again.', 'warning')
+        return redirect(url_for('login'))
+
+    form = LoginForm()
+
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip()
+        if not code:
+            flash('Please enter the code sent to your email.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=pending_email)
+
+        record = login_otps_collection.find_one({'email': pending_email})
+        if not record:
+            flash('OTP not found. Please request a new code.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=pending_email)
+
+        if datetime.utcnow() > record.get('expires_at', datetime.utcnow()):
+            flash('Code expired. A new code is required.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=pending_email)
+
+        if code != record.get('code'):
+            # Increment attempt count (optional lockout logic)
+            login_otps_collection.update_one({'email': pending_email}, {'$inc': {'attempts': 1}})
+            flash('Invalid code. Please try again.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=pending_email)
+
+        # Success → promote pending to logged-in session
+        remember_me = bool(session.get('remember_me'))
+        try:
+            session.clear()
+        except Exception:
+            pass
+        session['user_email'] = pending_email
+        session.permanent = remember_me
+        # Cleanup OTP
+        login_otps_collection.delete_one({'email': pending_email})
+
+        # Optional: show a success flash
+        notification_count = get_notification_count(pending_email)
+        if notification_count > 0:
+            flash(f"Login successful! You have {notification_count} new notifications.", 'success')
+        else:
+            flash('Login successful!', 'success')
+
+        return redirect(url_for('user_dash'))
+
+    return render_template('login.html', form=form, otp_step=True, email=pending_email)
+
+@app.route('/resend-otp', methods=['POST'])
+def resend_otp():
+    """Resend login OTP to the pending email."""
+    pending_email = session.get('pending_email')
+    if not pending_email:
+        return jsonify({'success': False, 'message': 'Session expired. Please log in again.'}), 400
+
+    otp_code = f"{random.randint(100000, 999999)}"
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+    login_otps_collection.update_one(
+        {'email': pending_email},
+        {'$set': {'email': pending_email, 'code': otp_code, 'expires_at': expires_at, 'attempts': 0}},
+        upsert=True
+    )
+
+    try:
+        msg = Message(
+            subject='Your PlanFusion Login Code',
+            recipients=[pending_email],
+            body=f'Your one-time login code is: {otp_code}\nThis code expires in 10 minutes.'
+        )
+        mail.send(msg)
+    except Exception as mail_err:
+        app.logger.error(f'Failed to resend OTP to {pending_email}: {str(mail_err)}')
+        return jsonify({'success': False, 'message': 'Failed to send code. Try again later.'}), 500
+
+    return jsonify({'success': True, 'message': 'A new code has been sent to your email.'})
 
 # ✅ Configuration
 app.config.update(
@@ -48,12 +150,20 @@ app.config.update(
     MAIL_USERNAME=os.getenv('MAIL_USERNAME', 'planfusion123@gmail.com'),
     MAIL_PASSWORD=os.getenv('MAIL_PASSWORD', 'lvyr tleq ssxi spyw'),
     MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER', 'planfusion123@gmail.com'),
-    MONGODB_URI=os.getenv('MONGODB_URI', 'mongodb://localhost:27017/sandeepdb'),  # Updated to URI
+    MONGODB_URI=os.getenv('MONGODB_URI', 'mongodb+srv://mani:Pj8UHYA5wB92M9VD@cluster0.5hg0vzc.mongodb.net/planfusiondb?retryWrites=true&w=majority&appName=planfusion'),  # Updated to URI
     UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads'),  # Absolute path for uploads
     UPLOAD_FOLDER_DOCS=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'documents'),  # Absolute path for documents
     ALLOWED_EXTENSIONS={'png', 'jpg', 'jpeg', 'gif'},  # Allowed image extensions
     ALLOWED_EXTENSIONS_DOCS={'pdf', 'doc', 'docx'},  # Allowed document extensions
-    ALLOWED_EXTENSIONS_CERT={'pdf', 'png', 'jpg', 'jpeg'}  # Allowed certificate extensions
+    ALLOWED_EXTENSIONS_CERT={'pdf', 'png', 'jpg', 'jpeg'},  # Allowed certificate extensions
+    # Security and upload limits
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE=os.getenv('SESSION_COOKIE_SAMESITE', 'Lax'),
+    SESSION_COOKIE_SECURE=os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True',
+    MAX_CONTENT_LENGTH=int(os.getenv('MAX_CONTENT_LENGTH', 16 * 1024 * 1024)),  # 16 MB
+    AVATAR_MAX_BYTES=int(os.getenv('AVATAR_MAX_BYTES', 2 * 1024 * 1024)),       # 2 MB
+    DOC_MAX_BYTES=int(os.getenv('DOC_MAX_BYTES', 10 * 1024 * 1024)),           # 10 MB
+    CERT_MAX_BYTES=int(os.getenv('CERT_MAX_BYTES', 5 * 1024 * 1024))           # 5 MB
 )
 
 # Create upload directories if they don't exist
@@ -63,9 +173,13 @@ os.makedirs(app.config['UPLOAD_FOLDER_DOCS'], exist_ok=True)
 # ✅ Initialize Extensions
 mail = Mail(app)
 
-# Initialize scheduler
-scheduler = BackgroundScheduler()
-scheduler.start()
+# Initialize scheduler guarded by env flag to avoid duplicate runs under multiple workers
+ENABLE_SCHEDULER = os.getenv('ENABLE_SCHEDULER', 'False') == 'True'
+scheduler = None
+if ENABLE_SCHEDULER:
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    app.logger.info("BackgroundScheduler started (ENABLE_SCHEDULER=True)")
 
 def send_task_notification():
     """Send email notifications about pending tasks, skills, goals, and meetings to all users."""
@@ -190,18 +304,19 @@ def send_task_notification():
     except Exception as e:
         app.logger.error(f"Error sending notifications: {str(e)}")
 
-# Schedule notifications for 9 AM and 6 PM
-scheduler.add_job(
-    send_task_notification,
-    'cron',
-    hour='9,18',
-    minute=0,
-    id='task_notifications'
-)
+if ENABLE_SCHEDULER and scheduler:
+    # Schedule notifications for 9 AM and 6 PM
+    scheduler.add_job(
+        send_task_notification,
+        'cron',
+        hour='9,18',
+        minute=0,
+        id='task_notifications'
+    )
 
 def get_db():
     client = MongoClient(app.config['MONGODB_URI'])  # Use URI
-    return client['sandeepdb']
+    return client['planfusiondb']
 
 
 db = get_db()  # Get the database connection
@@ -209,6 +324,7 @@ db = get_db()  # Get the database connection
 # Define collections
 users_collection = db['users']
 dashboard_tasks_collection = db['dashboard_tasks']
+login_otps_collection = db['login_otps']
 
 # ✅ Logging
 logging.basicConfig(filename='app.log', level=logging.INFO,
@@ -268,6 +384,64 @@ def allowed_file_cert(filename):
 def random_string(length):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+# --- File validation helpers ---
+def get_file_size_bytes(file_storage):
+    try:
+        current_pos = file_storage.stream.tell()
+    except Exception:
+        current_pos = 0
+    try:
+        file_storage.stream.seek(0, os.SEEK_END)
+        size = file_storage.stream.tell()
+        file_storage.stream.seek(0)
+        return size
+    except Exception:
+        # Fallback to length of read content (may load into memory)
+        data = file_storage.read()
+        size = len(data)
+        file_storage.stream.seek(0)
+        return size
+
+def sniff_image_magic(header_bytes):
+    # JPEG
+    if header_bytes.startswith(b"\xFF\xD8\xFF"):
+        return True
+    # PNG
+    if header_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        return True
+    # GIF
+    if header_bytes.startswith(b"GIF87a") or header_bytes.startswith(b"GIF89a"):
+        return True
+    return False
+
+def sniff_document_magic(header_bytes):
+    # PDF
+    if header_bytes.startswith(b"%PDF"):
+        return True
+    # DOCX/ZIP
+    if header_bytes.startswith(b"PK\x03\x04"):
+        return True
+    # DOC (OLE Compound File)
+    if header_bytes.startswith(b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"):
+        return True
+    return False
+
+def is_valid_image_file(file_storage):
+    try:
+        header = file_storage.stream.read(16)
+        file_storage.stream.seek(0)
+        return sniff_image_magic(header)
+    except Exception:
+        return False
+
+def is_valid_document_file(file_storage):
+    try:
+        header = file_storage.stream.read(8)
+        file_storage.stream.seek(0)
+        return sniff_document_magic(header)
+    except Exception:
+        return False
+
 
 app.jinja_env.globals['random_string'] = random_string  # Make it available in templates
 
@@ -308,6 +482,12 @@ def register():
     """
     Handles user registration.
     """
+    if request.method == 'GET':
+        # Clear any stale flashes on refresh/back navigation
+        try:
+            session.pop('_flashes', None)
+        except Exception:
+            pass
     form = RegisterForm()
     if form.validate_on_submit():
         name = form.name.data.strip()
@@ -324,8 +504,17 @@ def register():
             user_data = {"name": name, "email": email, "password": hashed_password}
             insert_one("users", user_data)
             logging.info(f"User registered: {email}")
+            
             flash("Registration successful! You can now log in to your account.", "success")
-            return redirect(url_for('login'))
+            
+            # Clear session data but preserve flash messages
+            session_data = dict(session)
+            session.clear()
+            for key, value in session_data.items():
+                if key.startswith('_flashes'):
+                    session[key] = value
+            
+            return redirect(url_for('login', from_registration='true'))
         except Exception as e:
             logging.error(f"Registration error: {e}")
             flash("There was an error during registration. Please try again later.", "danger")
@@ -404,7 +593,59 @@ def login():
     """
     Handles user login with optimized database operations.
     """
+    # If visiting via GET, clear stale flashes; redirect authenticated users
+    if request.method == 'GET':
+        # Only clear flash messages if not coming from registration
+        if not request.args.get('from_registration'):
+            try:
+                session.pop('_flashes', None)
+            except Exception:
+                pass
+        # Clear any stale pending OTP unless explicitly entering OTP flow
+        if session.get('pending_email') and not request.args.get('otp'):
+            try:
+                session.pop('pending_email', None)
+                session.pop('remember_me', None)
+            except Exception:
+                pass
+        # Only redirect if user is already logged in AND not coming from registration
+        if 'user_email' in session and not request.args.get('from_registration'):
+            return redirect(url_for('user_dash'))
+
     form = LoginForm()
+    # If OTP step is pending, allow verifying code on the same page
+    if request.method == 'POST' and session.get('pending_email') and request.form.get('code'):
+        email_pending = session.get('pending_email')
+        code = request.form.get('code', '').strip()
+        record = login_otps_collection.find_one({'email': email_pending})
+        if not record:
+            flash('OTP not found. Please request a new code.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=email_pending)
+        if datetime.utcnow() > record.get('expires_at', datetime.utcnow()):
+            flash('Code expired. Please resend a new code.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=email_pending)
+        if code != record.get('code'):
+            login_otps_collection.update_one({'email': email_pending}, {'$inc': {'attempts': 1}})
+            flash('Invalid code. Please try again.', 'danger')
+            return render_template('login.html', form=form, otp_step=True, email=email_pending)
+
+        # Success → promote session to logged-in
+        remember_me = bool(session.get('remember_me'))
+        try:
+            session.clear()
+        except Exception:
+            pass
+        session['user_email'] = email_pending
+        session.permanent = remember_me
+        login_otps_collection.delete_one({'email': email_pending})
+
+        notification_count = get_notification_count(email_pending)
+        if notification_count > 0:
+            flash(f"Login successful! You have {notification_count} new notifications.", 'success')
+        else:
+            flash('Login successful!', 'success')
+        return redirect(url_for('user_dash'))
+
     if form.validate_on_submit():
         email = form.email.data.strip()
         password = form.password.data.strip()
@@ -452,27 +693,47 @@ def login():
                 flash(f"Incorrect password. {remaining_attempts} attempts remaining.", "danger")
                 return render_template('login.html', form=form)
                 
-            # Successful login
-            session['user_email'] = user['email']
-            session.permanent = bool(remember)
-            logging.info(f"Login successful for {user['email']}")
-            
-            # Reset login attempts
+            # Password OK → Move to OTP verification
+            try:
+                session.clear()
+            except Exception:
+                pass
+
+            # Generate 6-digit OTP and save with 10-minute expiry
+            otp_code = f"{random.randint(100000, 999999)}"
+            expires_at = datetime.utcnow() + timedelta(minutes=10)
+            login_otps_collection.update_one(
+                {'email': email},
+                {'$set': {'email': email, 'code': otp_code, 'expires_at': expires_at, 'attempts': 0}},
+                upsert=True
+            )
+
+            # Store pending email in session until OTP is verified
+            session['pending_email'] = email
+            session['remember_me'] = bool(remember)
+
+            # Send OTP email
+            try:
+                msg = Message(
+                    subject="Your PlanFusion Login Code",
+                    recipients=[email],
+                    body=f"Your one-time login code is: {otp_code}\nThis code expires in 10 minutes."
+                )
+                mail.send(msg)
+            except Exception as mail_err:
+                logging.error(f"Failed to send OTP email to {email}: {str(mail_err)}")
+                flash("Could not send OTP email. Please try again.", "danger")
+                return render_template('login.html', form=form)
+
+            # Reset login attempts upon passing password stage
             login_attempts_collection.update_one(
                 {'email': email},
                 {'$set': {'attempts': 0, 'lock_time': None}}
             )
-            
-            # Get notification count in a single query
-            notification_count = get_notification_count(user['email'])
-            
-            if notification_count > 0:
-                flash(f"Login successful! You have {notification_count} new notifications.", "success")
-            else:
-                flash("Login successful!", "success")
-                
-            return redirect(url_for('user_dash'))
-            
+
+            flash("We sent a 6-digit code to your email. Enter it to finish login.", "success")
+            return redirect(url_for('login', otp='1'))
+
         except Exception as e:
             logging.error(f"Login error: {str(e)}")
             flash("An error occurred during login. Please try again.", "danger")
@@ -483,6 +744,10 @@ def login():
             for error in errors:
                 flash(f"{field}: {error}", "danger")
                 
+    # Only show OTP step on GET when explicitly requested via otp=1
+    if request.method == 'GET' and session.get('pending_email') and request.args.get('otp') == '1':
+        return render_template('login.html', form=form, otp_step=True, email=session.get('pending_email'))
+
     return render_template('login.html', form=form)
 
 
@@ -879,7 +1144,15 @@ def logout():
     """
     Logs the user out.
     """
-    session.pop('user_email', None)
+    # Clear entire session to avoid any cross-user state
+    try:
+        session.clear()
+    except Exception:
+        session.pop('user_email', None)
+        try:
+            session.pop('_flashes', None)
+        except Exception:
+            pass
     flash("You have been logged out.", "success")
     return redirect(url_for('login'))
 
@@ -1006,23 +1279,32 @@ def update_user_profile(data, email):
     return update_one("user_profile", {"email": email}, update_data)
 
 
-@app.route('/profile', methods=['GET'])
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     try:
-        user_profile = get_user_profile(session['email'])
+        if request.method == 'POST':
+            # Support AJAX profile updates expecting JSON
+            data = request.form.to_dict()
+            data['email'] = session['user_email']
+            update_user_profile(data, session['user_email'])
+            return jsonify({'success': True})
+
+        user_profile = get_user_profile(session['user_email'])
         return render_template('profile.html', profile=user_profile)
     except Exception as e:
+        app.logger.error(f"Error in profile route: {str(e)}")
+        if request.method == 'POST':
+            return jsonify({'success': False, 'error': str(e)}), 500
         flash('Error loading profile. Please try again.', 'error')
-        logger.error(f"Error in profile route: {str(e)}")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('user_dash'))
 
 @app.route('/profile/update', methods=['POST'])
 @login_required
 def update_profile():
     try:
         data = request.form.to_dict()
-        data['email'] = session['email']
+        data['email'] = session['user_email']
         
         # Handle avatar upload
         if 'avatar' in request.files:
@@ -1033,12 +1315,12 @@ def update_profile():
                 avatar.save(avatar_path)
                 data['avatar_url'] = url_for('static', filename=f'uploads/{filename}')
         
-        update_user_profile(data, session['email'])
+        update_user_profile(data, session['user_email'])
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('profile'))
     except Exception as e:
         flash('Error updating profile. Please try again.', 'error')
-        logger.error(f"Error in update_profile route: {str(e)}")
+        app.logger.error(f"Error in update_profile route: {str(e)}")
         return redirect(url_for('profile'))
 
 @app.route('/upload_avatar', methods=['POST'])
@@ -1060,9 +1342,16 @@ def upload_avatar():
             app.logger.error("No selected file")
             return jsonify({"error": "No selected file"}), 400
             
+        # Extension and content checks
         if not file or not allowed_file(file.filename):
             app.logger.error(f"Invalid file type: {file.filename}")
             return jsonify({"error": "Invalid file type"}), 400
+        if get_file_size_bytes(file) > app.config['AVATAR_MAX_BYTES']:
+            app.logger.error("Avatar exceeds size limit")
+            return jsonify({"error": "File too large"}), 413
+        if not is_valid_image_file(file):
+            app.logger.error("Avatar content failed validation")
+            return jsonify({"error": "Invalid image content"}), 400
             
         # Ensure upload directory exists
         upload_dir = app.config['UPLOAD_FOLDER']
@@ -1470,6 +1759,12 @@ def upload_document():
         if not file or not allowed_file_docs(file.filename):
             app.logger.error(f"Invalid file type: {file.filename}")
             return jsonify({'message': 'Invalid file type. Allowed types: pdf, doc, docx'}), 400
+        if get_file_size_bytes(file) > app.config['DOC_MAX_BYTES']:
+            app.logger.error("Document exceeds size limit")
+            return jsonify({'message': 'File too large'}), 413
+        if not is_valid_document_file(file):
+            app.logger.error("Document content failed validation")
+            return jsonify({'message': 'Invalid document content'}), 400
             
         skill_id = request.form.get('skillId')
         if not skill_id:
@@ -1556,6 +1851,15 @@ def upload_certificate():
         if not file or not allowed_file_cert(file.filename):
             app.logger.error(f"Invalid file type: {file.filename}")
             return jsonify({'message': 'Invalid file type. Allowed types: pdf, png, jpg, jpeg'}), 400
+        if get_file_size_bytes(file) > app.config['CERT_MAX_BYTES']:
+            app.logger.error("Certificate exceeds size limit")
+            return jsonify({'message': 'File too large'}), 413
+        # Accept image or PDF certificates
+        header = file.stream.read(16)
+        file.stream.seek(0)
+        if not (sniff_image_magic(header) or header.startswith(b'%PDF')):
+            app.logger.error("Certificate content failed validation")
+            return jsonify({'message': 'Invalid certificate content'}), 400
             
         skill_id = request.form.get('skillId')
         if not skill_id:
@@ -1665,6 +1969,23 @@ def add_dashboard_task():
             task_data['reminder'] = data.get('reminder')
         if data.get('label'):
             task_data['label'] = data.get('label')
+
+        # Duplicate detection: only when all of name, priority, due_date, and reminder are present
+        if all([
+            task_data.get('name'),
+            task_data.get('priority'),
+            task_data.get('due_date'),
+            task_data.get('reminder')
+        ]):
+            existing = db.dashboard_tasks.find_one({
+                'user_email': email,
+                'name': task_data['name'],
+                'priority': task_data['priority'],
+                'due_date': task_data['due_date'],
+                'reminder': task_data['reminder']
+            })
+            if existing:
+                return jsonify({'message': 'Task already exists with the same date, reminder, and priority'}), 409
 
         # Insert the task
         result = db.dashboard_tasks.insert_one(task_data)
@@ -2119,7 +2440,7 @@ def update_user_settings():
                 update_data['focus_indicators'] = accessibility['focus_indicators']
 
         if update_data:
-            result = update_one('users', {'email': email}, {'$set': update_data})
+            result = update_one('users', {'email': email}, update_data)
             if result:
                 return jsonify({'message': 'Settings updated successfully'})
             else:
@@ -2133,4 +2454,12 @@ def update_user_settings():
 
 # ✅ Run App
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Allow overriding via env, default to localhost:5000
+    host = os.getenv('HOST', '127.0.0.1')
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_DEBUG', 'True') == 'True'
+
+    url = f"http://{host}:{port}/"
+    print(url)
+
+    app.run(debug=debug, host=host, port=port)

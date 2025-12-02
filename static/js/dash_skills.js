@@ -606,9 +606,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Event listener for toggling the view (list/grid)
     viewToggle.addEventListener("click", function () {
-        skillList.classList.toggle("grid-view");
+        const isGrid = skillList.classList.toggle("grid-view");
         skillList.classList.toggle("list-view");
+        // Update button text/icon
+        if (isGrid) {
+            this.innerHTML = '<i class="ri-list-check"></i> List View';
+        } else {
+            this.innerHTML = '<i class="ri-grid-fill"></i> Grid View';
+        }
     });
+
+    // Ensure initial label matches initial state
+    if (skillList.classList.contains('grid-view')) {
+        viewToggle.innerHTML = '<i class="ri-list-check"></i> List View';
+    } else {
+        viewToggle.innerHTML = '<i class="ri-grid-fill"></i> Grid View';
+    }
 
     // Event listener for sorting the skills alphabetically
     sortToggle.addEventListener("click", function () {

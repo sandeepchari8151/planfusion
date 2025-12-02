@@ -54,7 +54,8 @@
 
 .task-container.grid-view {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
 }
 
 .task-container.list-view {
@@ -401,9 +402,13 @@
 }
 
 .grid-view .task-item {
-  display: inline-block;
-  width: 45%;
-  margin: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
+  height: auto;
+  min-height: 120px;
 }
 
 .list-view .task-item {
@@ -1477,7 +1482,7 @@
 
 .grid-view.task-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
   padding: 0;
 }

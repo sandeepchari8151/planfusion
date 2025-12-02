@@ -22,6 +22,10 @@
   <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
 </head>
 <body class="preload">
+  <script>
+    // Immediately scroll to top when page loads
+    window.scrollTo(0, 0);
+  </script>
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div id="flash-message-container">
@@ -176,7 +180,7 @@
     </form>     
   </div>
   <div class="bar">
-    Copyright © 2024 Plan Fusion. All rights reserved.
+    Copyright © 2025 Plan Fusion. All rights reserved.
   </div>    
 </section>
 

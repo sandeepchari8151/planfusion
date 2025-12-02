@@ -29,7 +29,7 @@
                 <span class="icon">
                     <ion-icon name="person"></ion-icon>
                 </span>
-                {{ form.name(class="form-control", placeholder=" ", required=True) }}
+                {{ form.name(class="form-control input-field", placeholder=" ", required=True, autocomplete="name") }}
                 <label for="name">Name</label>
             </div>
 
@@ -37,7 +37,7 @@
                 <span class="icon">
                     <ion-icon name="mail"></ion-icon>
                 </span>
-                {{ form.email(class="form-control", placeholder=" ", required=True) }}
+                {{ form.email(class="form-control input-field", placeholder=" ", required=True, autocomplete="email") }}
                 <label for="email">Email</label>
             </div>
             
@@ -45,7 +45,7 @@
                 <span class="icon">
                     <ion-icon name="lock-closed"></ion-icon>
                 </span>
-                {{ form.password(id="password", class="form-control", placeholder=" ", required=True) }}
+                {{ form.password(id="password", class="form-control input-field", placeholder=" ", required=True, autocomplete="new-password") }}
                 <button type="button" id="togglePassword">
                     <ion-icon name="eye"></ion-icon>
                 </button>
@@ -64,7 +64,7 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const passwordInput = document.getElementById("password");
     const togglePasswordButton = document.getElementById("togglePassword");
     const icon = togglePasswordButton.querySelector("ion-icon");
@@ -77,6 +77,28 @@
             passwordInput.type = "password";
             icon.setAttribute("name", "eye");
         }
+    });
+
+    // Floating label support for autofill/initial values
+    const inputs = document.querySelectorAll('.input-field');
+    function updateHasValue(el){
+        if (!el) return;
+        if (el.value && el.value.toString().trim() !== '') {
+            el.classList.add('has-value');
+        } else {
+            el.classList.remove('has-value');
+        }
+    }
+    inputs.forEach((el) => {
+        ['input','change','blur'].forEach(evt => el.addEventListener(evt, () => updateHasValue(el)));
+        setTimeout(() => updateHasValue(el), 50);
+    });
+
+    window.addEventListener('load', function() {
+        inputs.forEach((el) => setTimeout(() => {
+            const evt = new Event('input', { bubbles: true });
+            el.dispatchEvent(evt);
+        }, 0));
     });
 });
 </script>

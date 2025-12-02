@@ -1199,8 +1199,8 @@
       // Fetch notifications immediately
       fetchNotifications();
       
-      // Set up periodic refresh (every 5 minutes)
-      setInterval(fetchNotifications, 5 * 60 * 1000);
+      // Set up periodic refresh (every 60 seconds)
+      setInterval(fetchNotifications, 60 * 1000);
     });
   </script>
 </body>

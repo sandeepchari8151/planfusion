@@ -207,7 +207,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  document.body.style.overflowX = "hidden"; 
+  document.body.style.overflowX = "hidden";
+  // Scroll to top when page loads/reloads
+  window.scrollTo(0, 0);
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -215,18 +217,48 @@ document.addEventListener("DOMContentLoaded", function () {
   const overlay = document.getElementById("overlay");
   const closeBtn = document.getElementById("closeBtn");
 
-  learnMoreBtn.addEventListener("click", function () {
-      overlay.style.display = "flex"; // Show overlay
-  });
+  if (learnMoreBtn && overlay && closeBtn) {
+    learnMoreBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("Learn More button clicked"); // Debug log
+        overlay.style.display = "flex";
+        overlay.classList.add("show");
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+    });
 
-  closeBtn.addEventListener("click", function () {
-      overlay.style.display = "none"; // Hide overlay
-  });
+    closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        console.log("Close button clicked"); // Debug log
+        overlay.classList.remove("show");
+        setTimeout(() => {
+            overlay.style.display = "none";
+        }, 300); // Wait for transition to complete
+        document.body.style.overflow = "auto"; // Restore scrolling
+    });
 
-  // Close overlay when clicking outside content box
-  overlay.addEventListener("click", function (event) {
-      if (event.target === overlay) {
-          overlay.style.display = "none";
-      }
-  });
+    // Close overlay when clicking outside content box
+    overlay.addEventListener("click", function (event) {
+        if (event.target === overlay) {
+            console.log("Overlay background clicked"); // Debug log
+            overlay.classList.remove("show");
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 300); // Wait for transition to complete
+            document.body.style.overflow = "auto";
+        }
+    });
+
+    // Close overlay with Escape key
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && overlay.style.display === "flex") {
+            overlay.classList.remove("show");
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 300); // Wait for transition to complete
+            document.body.style.overflow = "auto";
+        }
+    });
+  } else {
+    console.error("Modal elements not found:", { learnMoreBtn, overlay, closeBtn });
+  }
 });

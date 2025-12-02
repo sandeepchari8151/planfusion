@@ -77,7 +77,8 @@ h2 {
 }
 
 .form-group .form-control:focus ~ label,
-.form-group .form-control:valid ~ label {
+.form-group .form-control:not(:placeholder-shown) ~ label,
+.form-group .form-control.has-value ~ label {
     top: -12px;
     font-size: 0.9em;
     color: #ddd;
@@ -220,4 +221,11 @@ button:active {
     color: #FFF !important;
     -webkit-text-fill-color: #FFF !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Ensure floating label on Chrome autofill */
+.form-group .form-control:-webkit-autofill ~ label {
+    top: -12px;
+    font-size: 0.9em;
+    color: #ddd;
 }
